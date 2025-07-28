@@ -1,0 +1,4 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Тест парсинга цен с сайта","26470","test_vseinstrumenti_prices[chromium]","widgets","Mon Jul 28 14:55:43 GMT 2025","broken","Mon Jul 28 14:56:10 GMT 2025","","test_vi","",""
+"","2025432","Сбор цен по всем товарам одним тестом","tests","Mon Jul 28 14:20:58 GMT 2025","passed","Mon Jul 28 14:54:44 GMT 2025","","test_pars","",""
+"","97995","test_vseinstrumenti_price[chromium]","widgets","Mon Jul 28 14:59:32 GMT 2025","failed","Mon Jul 28 15:01:10 GMT 2025","","test_vi","",""
