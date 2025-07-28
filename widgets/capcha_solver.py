@@ -4,7 +4,7 @@ import random
 import re
 from io import BytesIO
 from typing import Optional, Tuple
-# from PIL import Image
+from PIL import Image
 from playwright.sync_api import Page, sync_playwright, TimeoutError as PwTimeout
 import pytest
 import time
