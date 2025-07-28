@@ -171,7 +171,7 @@ from playwright.sync_api import Page
 @pytest.mark.ui
 def test_vseinstrumenti_price(page: Page, manual_page_factory):
     # Инициализируем страницу с вашими настройками и куками
-    page = manual_page_factory()
+    page = manual_page_factory(role="vi_test")
 
     # Устанавливаем дополнительные заголовки
     page.set_extra_http_headers({

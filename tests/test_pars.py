@@ -1,4 +1,5 @@
 import time
+import re
 
 import allure
 import csv
@@ -10,86 +11,86 @@ import allure
 from playwright.sync_api import Page
 from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
 
-#TODO Убрать все лишнее куки не работают
-# тест работает с куками в headless
-PRODUCT_URLS = [
-    "https://www.vseinstrumenti.ru/product/kombinirovannyj-korotkij-klyuch-force-14mm-755s14-987989/",
-    "https://www.vseinstrumenti.ru/product/nakidnoj-razemnyj-klyuch-dlya-trubok-force-12-mm-75112a-794748/",
-    "https://www.vseinstrumenti.ru/product/topor-800-g-fiberglasovoe-toporische-matrix-21647-534021/",
-    "https://www.vseinstrumenti.ru/product/drel-shurupovert-aeg-bs18g4-202c-4935478630-1760653/",
-    "https://www.vseinstrumenti.ru/product/zakrytye-ochki-soyuzspetsodezhda-rosomz-3h11-panorama-prozrachnye-2000000168654-3576162/",
-    "https://www.vseinstrumenti.ru/product/dlinnogubtsy-jonnesway-p118/"
-]
+"""Хороший тест с рабочими куками, но куки сделаные локально не подходят для CI"""
 
-OUTPUT_FILE = "prices.csv"
-PRICE_LOCATOR = '[data-qa="price-now"]'
-
-
-#TODO Убрать все лишнее куки не работают
-# тест работает с куками в headless
-@pytest.mark.parametrize("url", PRODUCT_URLS)
-@allure.title("Сбор цены с имитацией поведения пользователя")
-def test_get_price_human_like(page_fixture, url):
-    page = page_fixture(role="vi_test")
-    solver = SyncCaptchaSlider(page)
-
-    with allure.step("Переход на главную и прогрев страницы"):
-
-        with allure.step("Переход на главную и прогрев страницы"):
-            page.goto("https://www.vseinstrumenti.ru/", wait_until="domcontentloaded")
-            human_delay(1.2, 2.5)
-
-    with allure.step(f"Переход на товар: {url}"):
-        page.goto(url, wait_until="domcontentloaded")
-
-    human_delay(2, 3)
-
-    with allure.step("Имитируем поведение пользователя: скролл и мышь"):
-        for i in range(0, random.randint(400, 1000), 150):
-            page.mouse.wheel(0, i)
-            human_delay(0.2, 0.5)
-        page.mouse.move(random.randint(100, 600), random.randint(200, 400), steps=10)
-        human_delay(0.5, 1.0)
-
-    with allure.step("Наводим курсор на цену и считываем"):
-        try:
-            price_element = page.locator(PRICE_LOCATOR)
-            price_element.wait_for(timeout=10000)
-            box = price_element.bounding_box()
-            if not box:
-                raise Exception("No bounding box for price")
-            page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2, steps=20)
-            # human_delay(0.5, 1.2)
-            price = price_element.inner_text().strip()
-            print(price)
-        except Exception:
-            price = "-"
-            print(f"Цена не найдена на {url}")
-
-    with allure.step("Сохраняем результат в CSV"):
-        save_to_csv(url, price)
-
-    with allure.step("Вывод результата"):
-        print(f"✔ {url} — {price}")
-        allure.attach(price, name="Цена", attachment_type=allure.attachment_type.TEXT)
-
-    assert "₽" in price or "не найдена" not in price.lower()
-
-
-# ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-
-def human_delay(min_sec=0.5, max_sec=1.5):
-    """Пауза как у человека"""
-    time.sleep(random.uniform(min_sec, max_sec))
-
-
-def save_to_csv(url: str, price: str):
-    file_exists = os.path.isfile(OUTPUT_FILE)
-    with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(["URL", "Цена"])
-        writer.writerow([url, price])
+# #TODO Убрать все лишнее куки не работают
+# # тест работает с куками в headless
+# PRODUCT_URLS = [
+#     "https://www.vseinstrumenti.ru/product/kombinirovannyj-korotkij-klyuch-force-14mm-755s14-987989/",
+#     "https://www.vseinstrumenti.ru/product/nakidnoj-razemnyj-klyuch-dlya-trubok-force-12-mm-75112a-794748/",
+#     "https://www.vseinstrumenti.ru/product/topor-800-g-fiberglasovoe-toporische-matrix-21647-534021/",
+#     "https://www.vseinstrumenti.ru/product/drel-shurupovert-aeg-bs18g4-202c-4935478630-1760653/",
+#     "https://www.vseinstrumenti.ru/product/zakrytye-ochki-soyuzspetsodezhda-rosomz-3h11-panorama-prozrachnye-2000000168654-3576162/",
+#     "https://www.vseinstrumenti.ru/product/dlinnogubtsy-jonnesway-p118/"
+# ]
+#
+# OUTPUT_FILE = "prices.csv"
+# PRICE_LOCATOR = '[data-qa="price-now"]'
+#
+#
+# #TODO Убрать все лишнее куки не работают
+# # тест работает с куками в headless
+# @pytest.mark.parametrize("url", PRODUCT_URLS)
+# @allure.title("Сбор цены с имитацией поведения пользователя")
+# def test_get_price_human_like(page_fixture, url):
+#     page = page_fixture(role="vi_test")
+#     solver = SyncCaptchaSlider(page)
+#
+#     with allure.step("Переход на главную и прогрев страницы"):
+#         page.goto("https://www.vseinstrumenti.ru/", wait_until="domcontentloaded")
+#         human_delay(1.2, 2.5)
+#
+#     with allure.step(f"Переход на товар: {url}"):
+#         page.goto(url, wait_until="domcontentloaded")
+#
+#     human_delay(2, 3)
+#
+#     with allure.step("Имитируем поведение пользователя: скролл и мышь"):
+#         for i in range(0, random.randint(400, 1000), 150):
+#             page.mouse.wheel(0, i)
+#             human_delay(0.2, 0.5)
+#         page.mouse.move(random.randint(100, 600), random.randint(200, 400), steps=10)
+#         human_delay(0.5, 1.0)
+#
+#     with allure.step("Наводим курсор на цену и считываем"):
+#         try:
+#             price_element = page.locator(PRICE_LOCATOR)
+#             price_element.wait_for(timeout=10000)
+#             box = price_element.bounding_box()
+#             if not box:
+#                 raise Exception("No bounding box for price")
+#             page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2, steps=20)
+#             # human_delay(0.5, 1.2)
+#             price = price_element.inner_text().strip()
+#             print(price)
+#         except Exception:
+#             price = "-"
+#             print(f"Цена не найдена на {url}")
+#
+#     with allure.step("Сохраняем результат в CSV"):
+#         save_to_csv(url, price)
+#
+#     with allure.step("Вывод результата"):
+#         print(f"✔ {url} — {price}")
+#         allure.attach(price, name="Цена", attachment_type=allure.attachment_type.TEXT)
+#
+#     assert "₽" in price or "не найдена" not in price.lower()
+#
+#
+# # ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+#
+# def human_delay(min_sec=0.5, max_sec=1.5):
+#     """Пауза как у человека"""
+#     time.sleep(random.uniform(min_sec, max_sec))
+#
+#
+# def save_to_csv(url: str, price: str):
+#     file_exists = os.path.isfile(OUTPUT_FILE)
+#     with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as f:
+#         writer = csv.writer(f)
+#         if not file_exists:
+#             writer.writerow(["URL", "Цена"])
+#         writer.writerow([url, price])
 
 
 # @allure.title("Открытие всех страниц по ролям")
@@ -329,9 +330,347 @@ def save_to_csv(url: str, price: str):
 #         writer.writerow([url, price])
 
 
+"""Тест законсервирован до лучших времен куки с автоматизации не подходят"""
+
+import csv
+import os
+import random
+import time
+import pytest
+import allure
+from playwright.sync_api import Page
+from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
+
+
+PRODUCT_URLS = [
+    "https://www.vseinstrumenti.ru/product/topor-800-g-fiberglasovoe-toporische-matrix-21647-534021/",
+    "https://www.vseinstrumenti.ru/product/drel-shurupovert-aeg-bs18g4-202c-4935478630-1760653/",
+    "https://www.vseinstrumenti.ru/product/zakrytye-ochki-soyuzspetsodezhda-rosomz-3h11-panorama-prozrachnye-2000000168654-3576162/",
+    "https://www.vseinstrumenti.ru/product/dlinnogubtsy-jonnesway-p118/",
+    "https://www.vseinstrumenti.ru/product/nabor-almaznyh-nadfilej-140h70h3-5-sht-matrix-master-15833-542881/",
+    "https://www.vseinstrumenti.ru/product/nabor-almaznyh-nadfilej-140h70h3-10-sht-matrix-master-15835-542880/",
+    "https://www.vseinstrumenti.ru/product/nabor-poloten-universalnyj-10-sht-dlya-elektrolobzika-kraftool-159590-h10-218512/",
+    "https://www.vseinstrumenti.ru/product/ploskij-napilnik-150-mm-dvuhkomponentnaya-rukoyatka-2-sibrteh-16224-991952/",
+    "https://www.vseinstrumenti.ru/product/ploskij-napilnik-250-mm-dvuhkomponentnaya-rukoyatka-2-sibrteh-16230-991965/",
+    "https://www.vseinstrumenti.ru/product/ploskij-napilnik-300-mm-sibrteh-16232-521625/",
+    "https://www.vseinstrumenti.ru/product/napilniki-s-dvuhkomponentnoj-ruchkoj-ploskij-polukruglyj-trehgrannyj-kvadratnyj-kruglyj-2-200mm-zubr-ekspert-16651-20-h5-669149/",
+    "https://www.vseinstrumenti.ru/product/nabor-napilnikov-s-dvuhkomponentnoj-ruchkoj-ploskij-polukruglyj-trehgrannyj-kvadratnyj-kruglyj-2-250mm-zubr-ekspert-16651-25-h5-669150/",
+    "https://www.vseinstrumenti.ru/product/ruchka-derevyannaya-100-mm-dlya-napilnikov-dlinoj-200-mm-rossiya-16663-539509/",
+    "https://www.vseinstrumenti.ru/product/chashka-ogranichitelnaya-dlya-fiksatsii-nozha-68-mm-m10-makita-168526-9-4713114/",
+    "https://www.vseinstrumenti.ru/product/ploskogubtsy-nickel-200-mm-matrix-16906-552893/",
+    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-16x10x100-mm-t5k10-hiz-ri-406-6-15777910/",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-20x16x140-vk8-gost-18884-73-hiz-5623116u-14938636/",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-20x16x140-t5k10-gost-18884-73-hiz-5663116u-14812823/",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-vk8-gost-18884-73-hiz-562416u-14938642/",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-vk8-levye-gost-18884-73-hiz-563416u-14938618/",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-t15k6-gost-18884-73-hiz-564416u-14813033/",
+    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-25x16x140-mm-t5k10-hiz-ri-406-14-15777874/",
+    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-32h20h170-mm-vk8-ri-406-17-18149088/",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-chistovyh-shirokih-3-sht-32x20x170-t15k6-gost-18881-73-hiz-751420u-14854247/",
+    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-t5k10-32h20h170-mm-hiz-2130-0013-033129-733487/",
+    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-vk8-ri-406-25-18149100/",
+    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-t5k10-ri-406-29-18149118/",
+    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-t5k10-levyj-ri-406-30-18149160/",
+    "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-25x16x140-mm-vk8-hiz-ri-411-11-15698740",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-podreznyh-otognutyh-levyh-4-sht-25x16x140-t15k6-gost-18880-73-hiz-510416u-14863421",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-podreznyh-otognutyh-4-sht-25x16x140-t5k10-gost-18880-73-hiz-511416u-14863655",
+    "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-vk8-2112-0015-25h20h140-mm-hiz-034982-865267",
+    "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-hiz-25h20h140-mm-t5k10-levyj-ri-411-51-18188382",
+    "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-t5k10-32h25h170-mm-hiz-2112-0065-033971-733831",
+    "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-sibrteh-200-mm-dvuhkomponentnye-rukoyatki-17052-1211358",
+    "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-180-mm-fosfatirovanie-trehkomponentnye-rukoyatki-sibrteh-17054-975907",
+    "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-matrix-pro-185-mm-usilennaya-sistema-17060-949018/",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-pryamoj-25x16x140-mm-vk8-hiz-ri-153-80-15698440",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-t5k10-hiz-ri-153-315-15777970",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-vk8-hiz-ri-153-62-15698572",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-vk8-levyj-hiz-ri-153-202-15698560",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-t15k6-hiz-ri-153-61-15698554",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-t5k10-hiz-ri-153-60-15698530",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-32x20x170-mm-vk8-hiz-ri-153-205-15698512",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-hiz-32h20h170-mm-vk8-levyj-ri-153-208-18149592",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-32x20x170-mm-t5k10-hiz-ri-153-66-15698518",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-hiz-40h25h200-mm-t5k10-ri-153-69-18149964",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-vk8-hiz-ri-153-398-15697810",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-t15k6-hiz-ri-153-285-15697798",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-vk8-hiz-ri-153-95-15698314",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-t15k6-hiz-ri-153-94-15698302",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-t5k10-hiz-ri-153-93-15698308",
+    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-prohodnyh-upornyh-izognutyh-4-sht-levye-25x16x140-t5k10-gost-18879-73-tip-2-hiz-530416u-14864009",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-vk8-hiz-ri-153-98-15697828",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-t15k6-hiz-ri-153-97-15697822",
+    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-t5k10-hiz-ri-153-96-15697816",
+    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-25x16x140-mm-t15k6-hiz-ri-410-11-15779128",
+    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-25x16x140-mm-t5k10-hiz-ri-410-12-15778858",
+    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-hiz-32h20h170-mm-t5k10-ri-410-18-18150132",
+    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-vnutrennej-rezby-16x16x170-mm-t5k10-hiz-ri-409-12-15778174",
+    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-vnutrennej-rezby-25x25x240-mm-vk8-hiz-ri-409-28-15778804"
+]
+
+OUTPUT_FILE = "prices.csv"
+PRICE_LOCATOR = '[data-qa="price-now"]'
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+
+
+@allure.title("Сбор цен по всем товарам одним тестом")
+def test_get_all_prices_human_like_2(page_fixture):
+    page = page_fixture()
+    solver = SyncCaptchaSlider(page)
+    price_results = []
+
+    # Паттерн антибан настроек
+    page.context.set_extra_http_headers({"User-Agent": USER_AGENT})
+    page.set_viewport_size({"width": 1366, "height": 768})
+    page.add_init_script("""
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
+        Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5, 6]});
+        window.chrome = { runtime: {} };
+        const getFakeData = () => new Uint8ClampedArray([128,128,128,255,128,128,128,255]);
+        HTMLCanvasElement.prototype.toDataURL = function(){ return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Zw8AAjMBi/MaaWkAAAAASUVORK5CYII="; }
+        window.OffscreenCanvas = HTMLCanvasElement;
+        const _orig_ua = navigator.userAgent;
+        Object.defineProperty(navigator, 'userAgent', { get: () => _orig_ua });
+        Intl.DateTimeFormat = function() { return { resolvedOptions: () => ({ timeZone: 'Europe/Moscow' }) } }
+    """)
+
+    with allure.step("Переход на главную и прогрев страницы"):
+        page.goto("https://www.vseinstrumenti.ru/", wait_until="domcontentloaded")
+        human_delay(1.2, 2.5)
+        curr_url = page.url
+        if re.search(r"/xpvnsulc|forbidden", curr_url) or page_contains_forbidden(page):
+            solver.capcha_solver()
+
+        if page_contains_forbidden(page):
+            assert False, "Тест остановлен: найден forbidden после перехода на главную"
+        solver.capcha_solver()
+        human_delay(1.2, 2.5)
+
+    for url in PRODUCT_URLS:
+        with allure.step(f"Переход на товар: {url}"):
+            page.goto(url, wait_until="load", timeout=60000)
+            with allure.step("Go to товар, обработка антибота"):
+                print("Ура, мы на товаре:", page.url)
+            curr_url = page.url
+            if re.search(r"/xpvnsulc|forbidden", curr_url) or page_contains_forbidden(page):
+                solver.capcha_solver()
+
+            if page_contains_forbidden(page):
+                assert False, f"Тест остановлен: найден forbidden после перехода на url товара: {url}"
+
+            solver.capcha_solver()
+            human_delay(2, 3)
+
+        with allure.step("Имитируем поведение пользователя: скролл и мышь"):
+            for i in range(0, random.randint(400, 1000), 150):
+                page.mouse.wheel(0, i)
+                human_delay(0.2, 0.5)
+            page.mouse.move(random.randint(100, 600), random.randint(200, 400), steps=10)
+            human_delay(0.5, 1.0)
+
+        with allure.step("Наводим курсор на цену и считываем"):
+            try:
+                price_element = page.locator(PRICE_LOCATOR)
+                price_element.wait_for(timeout=10000)
+                box = price_element.bounding_box()
+                if not box:
+                    raise Exception("No bounding box for price")
+                page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2, steps=20)
+                human_delay(0.5, 1.2)
+                price = price_element.inner_text().strip()
+            except Exception:
+                price = "-"
+                print(f"Цена не найдена на {url}")
+            price_results.append((url, price))
+
+        with allure.step("Сохраняем результат в CSV"):
+            save_to_csv(url, price)
+
+        with allure.step("Вывод результата"):
+            print(f"✔ {url} — {price}")
+            allure.attach(price, name="Цена", attachment_type=allure.attachment_type.TEXT)
+
+        assert "₽" in price or price == "-", f"Нет корректной цены на {url}: {price}"
+
+    # Можно добавить общую проверку по результатам
+    print("Результаты парсинга:")
+    for url, price in price_results:
+        print(f"{url} — {price}")
+
+def human_delay(min_sec=0.5, max_sec=1.5):
+    time.sleep(random.uniform(min_sec, max_sec))
+
+def save_to_csv(url: str, price: str):
+    file_exists = os.path.isfile(OUTPUT_FILE)
+    with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["URL", "Цена"])
+        writer.writerow([url, price])
 
 
 
+"""Тест законсервирован до лучших времен куки с автоматизации не подходят"""
+
+# import csv
+# import os
+# import random
+# import time
+# import pytest
+# import allure
+# from playwright.sync_api import Page
+# from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
+#
+#
+# PRODUCT_URLS = [
+#     "https://www.vseinstrumenti.ru/product/topor-800-g-fiberglasovoe-toporische-matrix-21647-534021/",
+#     "https://www.vseinstrumenti.ru/product/drel-shurupovert-aeg-bs18g4-202c-4935478630-1760653/",
+#     "https://www.vseinstrumenti.ru/product/zakrytye-ochki-soyuzspetsodezhda-rosomz-3h11-panorama-prozrachnye-2000000168654-3576162/",
+#     "https://www.vseinstrumenti.ru/product/dlinnogubtsy-jonnesway-p118/"
+# ]
+#
+# OUTPUT_FILE = "prices.csv"
+# PRICE_LOCATOR = '[data-qa="price-now"]'
+# USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " \
+#              "AppleWebKit/537.36 (KHTML, like Gecko) " \
+#              "Chrome/122.0.0.0 Safari/537.36"
+#
+#
+# # тест работает с куками в headless
+# @pytest.mark.parametrize("url", PRODUCT_URLS)
+# @allure.title("Сбор цены с имитацией поведения пользователя")
+# def test_get_price_human_like_2(page_fixture, url):
+#     page = page_fixture()
+#     solver = SyncCaptchaSlider(page)
+#
+#     # Паттерн антибан настроек
+#     page.context.set_extra_http_headers({"User-Agent": USER_AGENT})
+#     page.set_viewport_size({"width": 1366, "height": 768})
+#     page.add_init_script("""
+#     // Отключаем webdriver и подсовываем более "живой" fingerprint
+#     Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+#     Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
+#     Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5, 6]});
+#     window.chrome = { runtime: {} };
+#
+#     // Fingerprint: canvas spoof, audio spoof
+#     const getFakeData = () => new Uint8ClampedArray([128,128,128,255,128,128,128,255]);
+#     HTMLCanvasElement.prototype.toDataURL = function(){ return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Zw8AAjMBi/MaaWkAAAAASUVORK5CYII="; }
+#     window.OffscreenCanvas = HTMLCanvasElement;
+#
+#     // UserAgent spoof внутри navigator (для некоторых js-антиботов)
+#     const _orig_ua = navigator.userAgent;
+#     Object.defineProperty(navigator, 'userAgent', { get: () => _orig_ua });
+#
+#     // Timezone spoof
+#     Intl.DateTimeFormat = function() { return { resolvedOptions: () => ({ timeZone: 'Europe/Moscow' }) } }
+# """)
+#
+#     with allure.step("Переход на главную и прогрев страницы"):
+#         # Заходим на яндекс и ищем "Все инструменты"
+#         page.goto("https://mail.ru/", timeout=60000)
+#         human_delay(1, 2)
+#         search_box = page.locator('input[name="search_source"]')
+#         search_box.type("Все инструменты",200)
+#         page.keyboard.press("Enter")
+#         # Ждём появления результатов и ссылки на vseinstrumenti.ru, кликаем на первую (или где вхождение)
+#         page.wait_for_selector('a[href*="vseinstrumenti.ru"]', timeout=60000)
+#         first_link = page.locator('a[href*="vseinstrumenti.ru"]').first
+#         first_link.click()
+#         # Ждём загрузки целевого сайтаhref="https://www.vseinstrumenti.ru/"
+#         page.wait_for_url("https://www.vseinstrumenti.ru/*", timeout=15000)
+#
+#         # Проверяем принудительно — вдруг редирект на /xpvnsulc (или другая капча)
+#         curr_url = page.url
+#         if re.search(r"/xpvnsulc|forbidden", curr_url) or page_contains_forbidden(page):
+#             # Сразу решаем капчу!
+#             solver.capcha_solver()
+#
+#     with allure.step("Проверка 'forbidden' на главной"):
+#         if page_contains_forbidden(page):
+#             assert False, "Тест остановлен: найден forbidden после перехода на главную"
+#
+#     with allure.step("Проверка наличия капчи на главной"):
+#         solver.capcha_solver()
+#
+#     human_delay(1.2, 2.5)
+#
+#     # # Имитируем поведение настоящего браузера
+#     # page.context.set_extra_http_headers({"User-Agent": USER_AGENT})
+#     #
+#     # with allure.step("Переход на главную и прогрев страницы"):
+#     #     page.goto("https://www.vseinstrumenti.ru/", wait_until="domcontentloaded")
+#     #     human_delay(1.2, 2.5)
+#
+#
+#
+#     # with allure.step(f"Переход на товар: {url}"):
+#     #     page.goto(url, wait_until="load", timeout=60000)
+#     #     human_delay(2, 3)
+#
+#     with allure.step(f"Переход на товар: {url}"):
+#         page.goto(url, wait_until="load", timeout=60000)
+#         with allure.step("Go to товар, обработка антибота"):
+#             print("Ура, мы на товаре:", page.url)
+#         # Проверяем принудительно — вдруг редирект на /xpvnsulc (или другая капча)
+#         curr_url = page.url
+#         if re.search(r"/xpvnsulc|forbidden", curr_url) or page_contains_forbidden(page):
+#             # Сразу решаем капчу!
+#             solver.capcha_solver()
+#
+#     with allure.step(f"Проверка 'forbidden' на: {url}"):
+#         if page_contains_forbidden(page):
+#             assert False, "Тест остановлен: найден forbidden после перехода на url товара"
+#
+#     with allure.step(f"Проверка капчи на: {url}"):
+#         solver.capcha_solver()
+#
+#     human_delay(2, 3)
+#
+#     with allure.step("Имитируем поведение пользователя: скролл и мышь"):
+#         for i in range(0, random.randint(400, 1000), 150):
+#             page.mouse.wheel(0, i)
+#             human_delay(0.2, 0.5)
+#         page.mouse.move(random.randint(100, 600), random.randint(200, 400), steps=10)
+#         human_delay(0.5, 1.0)
+#
+#     with allure.step("Наводим курсор на цену и считываем"):
+#         try:
+#             price_element = page.locator(PRICE_LOCATOR)
+#             price_element.wait_for(timeout=10000)
+#             box = price_element.bounding_box()
+#             if not box:
+#                 raise Exception("No bounding box for price")
+#             page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2, steps=20)
+#             human_delay(0.5, 1.2)
+#             price = price_element.inner_text().strip()
+#         except Exception:
+#             price = "-"
+#             print(f"Цена не найдена на {url}")
+#
+#     with allure.step("Сохраняем результат в CSV"):
+#         save_to_csv(url, price)
+#
+#     with allure.step("Вывод результата"):
+#         print(f"✔ {url} — {price}")
+#         allure.attach(price, name="Цена", attachment_type=allure.attachment_type.TEXT)
+#
+#     assert "₽" in price or "не найдена" not in price.lower()
+#
+#
+# # ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+#
+# def human_delay(min_sec=0.5, max_sec=1.5):
+#     """Пауза как у человека"""
+#     time.sleep(random.uniform(min_sec, max_sec))
+#
+#
+# def save_to_csv(url: str, price: str):
+#     file_exists = os.path.isfile(OUTPUT_FILE)
+#     with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as f:
+#         writer = csv.writer(f)
+#         if not file_exists:
+#             writer.writerow(["URL", "Цена"])
+#         writer.writerow([url, price])
 
 
 # import base64

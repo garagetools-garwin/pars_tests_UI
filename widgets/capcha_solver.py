@@ -49,7 +49,7 @@ class SyncCaptchaSlider:
             self.page.wait_for_selector(self.CAPCHA_CONTROL_BUTTON, timeout=10000)
             print("Селектор слайдера появился")
         except Exception:
-            print("Капча не появилась в течение 60 секунд")
+            print("Капча не появилась в течение 10 секунд")
             return  # или что нужно делать если капчи нет
 
         # Дальше стандартная логика:
