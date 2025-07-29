@@ -144,7 +144,6 @@ jobs:
     needs: tests
     steps:
       - uses: actions/checkout@v4
-      - name: Download prices.csv artifact
       - uses: actions/download-artifact@v4
         with:
           name: prices
