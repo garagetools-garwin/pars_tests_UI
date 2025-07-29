@@ -135,7 +135,7 @@ jobs:
 
             📦 Commit: ${{ github.sha }}
             👤 Triggered by: ${{ github.actor }}
-          to: urin.a@garagetools.ru
+          to: urin.a@garagetools.ru,timofeev.a@garagetools.ru
           from: GitHub Actions <${{ secrets.GMAIL_USERNAME }}>
 
   notify-on-success:
@@ -162,6 +162,6 @@ jobs:
     
             📦 Commit: ${{ github.sha }}
             👤 Triggered by: ${{ github.actor }}
-          to: urin.a@garagetools.ru
+          to: urin.a@garagetools.ru,timofeev.a@garagetools.ru
           from: GitHub Actions <${{ secrets.GMAIL_USERNAME }}>
           attachments: prices.csv
