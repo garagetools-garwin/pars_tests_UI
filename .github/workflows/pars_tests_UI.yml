@@ -21,7 +21,7 @@ jobs:
     concurrency: pars_tests_UI_concurrency
 
     # запуск на виртуальной машине
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && (github.event.schedule == '0 5 * * *' || github.event.schedule == '0 14 * * *'))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && (github.event.schedule == '0 7 * * *' || github.event.schedule == '0 14 * * *'))
     runs-on: ubuntu-latest
     env:
       ADMIN_BUYER_EMAIL: ${{ secrets.ADMIN_BUYER_EMAIL }}
@@ -105,12 +105,6 @@ jobs:
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
 
-      - name: Upload prices.csv artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: prices
-          path: prices.csv
-
   notify-on-failure:
     if: |
      (failure()) ||
@@ -144,11 +138,6 @@ jobs:
     needs: tests
     steps:
       - uses: actions/checkout@v4
-      - name: Download prices.csv artifact
-      - uses: actions/download-artifact@v4
-        with:
-            name: prices
-            path: .
       - name: Send success email with prices.csv
         uses: dawidd6/action-send-mail@v3
         with:
