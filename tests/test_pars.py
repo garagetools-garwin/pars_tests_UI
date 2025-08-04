@@ -443,6 +443,7 @@ def test_get_all_prices_human_like_2(page_fixture):
         human_delay(1.2, 2.5)
         page.locator(CITY_SELECTION_BUTTON).click()
         human_delay(1.2, 2.5)
+        page.locator(MOSCOW_BUTTON).wait_for(timeout=60000)
         page.locator(MOSCOW_BUTTON).click()
         human_delay(1.2, 2.5)
 
