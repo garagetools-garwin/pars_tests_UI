@@ -441,11 +441,12 @@ def test_get_all_prices_human_like_2(page_fixture):
     with allure.step("Переход на главную и прогрев страницы"):
         page.goto("https://www.vseinstrumenti.ru/", wait_until="domcontentloaded")
         human_delay(1.2, 2.5)
-        page.locator(CITY_SELECTION_BUTTON).click()
-        human_delay(1.2, 2.5)
-        page.locator(MOSCOW_BUTTON).wait_for(timeout=60000)
-        page.locator(MOSCOW_BUTTON).click()
-        human_delay(1.2, 2.5)
+        page.locator('span:text=/москва/i').wait_for(timeout=10000)
+        # page.locator(CITY_SELECTION_BUTTON).click()
+        # human_delay(1.2, 2.5)
+        # page.locator(MOSCOW_BUTTON).wait_for(timeout=60000)
+        # page.locator(MOSCOW_BUTTON).click()
+        # human_delay(1.2, 2.5)
 
         curr_url = page.url
         if re.search(r"/xpvnsulc|forbidden", curr_url) or page_contains_forbidden(page):
