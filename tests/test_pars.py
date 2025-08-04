@@ -329,8 +329,10 @@ from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
 #             writer.writerow(["URL", "Цена"])
 #         writer.writerow([url, price])
 
-
+#TODO на каждой странице проверять либо цену либо отсутствие цены (нет в наличии), либо капчу
+#TODO
 """Тест законсервирован до лучших времен куки с автоматизации не подходят"""
+
 
 import csv
 import os
@@ -347,67 +349,70 @@ PRODUCT_URLS = [
     "https://www.vseinstrumenti.ru/product/drel-shurupovert-aeg-bs18g4-202c-4935478630-1760653/",
     "https://www.vseinstrumenti.ru/product/zakrytye-ochki-soyuzspetsodezhda-rosomz-3h11-panorama-prozrachnye-2000000168654-3576162/",
     "https://www.vseinstrumenti.ru/product/dlinnogubtsy-jonnesway-p118/",
-    "https://www.vseinstrumenti.ru/product/nabor-almaznyh-nadfilej-140h70h3-5-sht-matrix-master-15833-542881/",
-    "https://www.vseinstrumenti.ru/product/nabor-almaznyh-nadfilej-140h70h3-10-sht-matrix-master-15835-542880/",
-    "https://www.vseinstrumenti.ru/product/nabor-poloten-universalnyj-10-sht-dlya-elektrolobzika-kraftool-159590-h10-218512/",
-    "https://www.vseinstrumenti.ru/product/ploskij-napilnik-150-mm-dvuhkomponentnaya-rukoyatka-2-sibrteh-16224-991952/",
-    "https://www.vseinstrumenti.ru/product/ploskij-napilnik-250-mm-dvuhkomponentnaya-rukoyatka-2-sibrteh-16230-991965/",
-    "https://www.vseinstrumenti.ru/product/ploskij-napilnik-300-mm-sibrteh-16232-521625/",
-    "https://www.vseinstrumenti.ru/product/napilniki-s-dvuhkomponentnoj-ruchkoj-ploskij-polukruglyj-trehgrannyj-kvadratnyj-kruglyj-2-200mm-zubr-ekspert-16651-20-h5-669149/",
-    "https://www.vseinstrumenti.ru/product/nabor-napilnikov-s-dvuhkomponentnoj-ruchkoj-ploskij-polukruglyj-trehgrannyj-kvadratnyj-kruglyj-2-250mm-zubr-ekspert-16651-25-h5-669150/",
-    "https://www.vseinstrumenti.ru/product/ruchka-derevyannaya-100-mm-dlya-napilnikov-dlinoj-200-mm-rossiya-16663-539509/",
-    "https://www.vseinstrumenti.ru/product/chashka-ogranichitelnaya-dlya-fiksatsii-nozha-68-mm-m10-makita-168526-9-4713114/",
-    "https://www.vseinstrumenti.ru/product/ploskogubtsy-nickel-200-mm-matrix-16906-552893/",
-    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-16x10x100-mm-t5k10-hiz-ri-406-6-15777910/",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-20x16x140-vk8-gost-18884-73-hiz-5623116u-14938636/",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-20x16x140-t5k10-gost-18884-73-hiz-5663116u-14812823/",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-vk8-gost-18884-73-hiz-562416u-14938642/",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-vk8-levye-gost-18884-73-hiz-563416u-14938618/",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-t15k6-gost-18884-73-hiz-564416u-14813033/",
-    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-25x16x140-mm-t5k10-hiz-ri-406-14-15777874/",
-    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-32h20h170-mm-vk8-ri-406-17-18149088/",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-chistovyh-shirokih-3-sht-32x20x170-t15k6-gost-18881-73-hiz-751420u-14854247/",
-    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-t5k10-32h20h170-mm-hiz-2130-0013-033129-733487/",
-    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-vk8-ri-406-25-18149100/",
-    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-t5k10-ri-406-29-18149118/",
-    "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-t5k10-levyj-ri-406-30-18149160/",
-    "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-25x16x140-mm-vk8-hiz-ri-411-11-15698740",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-podreznyh-otognutyh-levyh-4-sht-25x16x140-t15k6-gost-18880-73-hiz-510416u-14863421",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-podreznyh-otognutyh-4-sht-25x16x140-t5k10-gost-18880-73-hiz-511416u-14863655",
-    "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-vk8-2112-0015-25h20h140-mm-hiz-034982-865267",
-    "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-hiz-25h20h140-mm-t5k10-levyj-ri-411-51-18188382",
-    "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-t5k10-32h25h170-mm-hiz-2112-0065-033971-733831",
-    "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-sibrteh-200-mm-dvuhkomponentnye-rukoyatki-17052-1211358",
-    "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-180-mm-fosfatirovanie-trehkomponentnye-rukoyatki-sibrteh-17054-975907",
-    "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-matrix-pro-185-mm-usilennaya-sistema-17060-949018/",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-pryamoj-25x16x140-mm-vk8-hiz-ri-153-80-15698440",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-t5k10-hiz-ri-153-315-15777970",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-vk8-hiz-ri-153-62-15698572",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-vk8-levyj-hiz-ri-153-202-15698560",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-t15k6-hiz-ri-153-61-15698554",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-t5k10-hiz-ri-153-60-15698530",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-32x20x170-mm-vk8-hiz-ri-153-205-15698512",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-hiz-32h20h170-mm-vk8-levyj-ri-153-208-18149592",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-32x20x170-mm-t5k10-hiz-ri-153-66-15698518",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-hiz-40h25h200-mm-t5k10-ri-153-69-18149964",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-vk8-hiz-ri-153-398-15697810",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-t15k6-hiz-ri-153-285-15697798",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-vk8-hiz-ri-153-95-15698314",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-t15k6-hiz-ri-153-94-15698302",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-t5k10-hiz-ri-153-93-15698308",
-    "https://www.vseinstrumenti.ru/product/upakovka-reztsov-prohodnyh-upornyh-izognutyh-4-sht-levye-25x16x140-t5k10-gost-18879-73-tip-2-hiz-530416u-14864009",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-vk8-hiz-ri-153-98-15697828",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-t15k6-hiz-ri-153-97-15697822",
-    "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-t5k10-hiz-ri-153-96-15697816",
-    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-25x16x140-mm-t15k6-hiz-ri-410-11-15779128",
-    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-25x16x140-mm-t5k10-hiz-ri-410-12-15778858",
-    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-hiz-32h20h170-mm-t5k10-ri-410-18-18150132",
-    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-vnutrennej-rezby-16x16x170-mm-t5k10-hiz-ri-409-12-15778174",
-    "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-vnutrennej-rezby-25x25x240-mm-vk8-hiz-ri-409-28-15778804"
+    # "https://www.vseinstrumenti.ru/product/nabor-almaznyh-nadfilej-140h70h3-5-sht-matrix-master-15833-542881/",
+    # "https://www.vseinstrumenti.ru/product/nabor-almaznyh-nadfilej-140h70h3-10-sht-matrix-master-15835-542880/",
+    # "https://www.vseinstrumenti.ru/product/nabor-poloten-universalnyj-10-sht-dlya-elektrolobzika-kraftool-159590-h10-218512/",
+    # "https://www.vseinstrumenti.ru/product/ploskij-napilnik-150-mm-dvuhkomponentnaya-rukoyatka-2-sibrteh-16224-991952/",
+    # "https://www.vseinstrumenti.ru/product/ploskij-napilnik-250-mm-dvuhkomponentnaya-rukoyatka-2-sibrteh-16230-991965/",
+    # "https://www.vseinstrumenti.ru/product/ploskij-napilnik-300-mm-sibrteh-16232-521625/",
+    # "https://www.vseinstrumenti.ru/product/napilniki-s-dvuhkomponentnoj-ruchkoj-ploskij-polukruglyj-trehgrannyj-kvadratnyj-kruglyj-2-200mm-zubr-ekspert-16651-20-h5-669149/",
+    # "https://www.vseinstrumenti.ru/product/nabor-napilnikov-s-dvuhkomponentnoj-ruchkoj-ploskij-polukruglyj-trehgrannyj-kvadratnyj-kruglyj-2-250mm-zubr-ekspert-16651-25-h5-669150/",
+    # "https://www.vseinstrumenti.ru/product/ruchka-derevyannaya-100-mm-dlya-napilnikov-dlinoj-200-mm-rossiya-16663-539509/",
+    # "https://www.vseinstrumenti.ru/product/chashka-ogranichitelnaya-dlya-fiksatsii-nozha-68-mm-m10-makita-168526-9-4713114/",
+    # "https://www.vseinstrumenti.ru/product/ploskogubtsy-nickel-200-mm-matrix-16906-552893/",
+    # "https://www.vseinstrumenti.ru/product/rezets-otreznoj-16x10x100-mm-t5k10-hiz-ri-406-6-15777910/",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-20x16x140-vk8-gost-18884-73-hiz-5623116u-14938636/",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-20x16x140-t5k10-gost-18884-73-hiz-5663116u-14812823/",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-vk8-gost-18884-73-hiz-562416u-14938642/",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-vk8-levye-gost-18884-73-hiz-563416u-14938618/",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-otreznyh-4-shtuki-25x16x140-t15k6-gost-18884-73-hiz-564416u-14813033/",
+    # "https://www.vseinstrumenti.ru/product/rezets-otreznoj-25x16x140-mm-t5k10-hiz-ri-406-14-15777874/",
+    # "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-32h20h170-mm-vk8-ri-406-17-18149088/",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-chistovyh-shirokih-3-sht-32x20x170-t15k6-gost-18881-73-hiz-751420u-14854247/",
+    # "https://www.vseinstrumenti.ru/product/rezets-otreznoj-t5k10-32h20h170-mm-hiz-2130-0013-033129-733487/",
+    # "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-vk8-ri-406-25-18149100/",
+    # "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-t5k10-ri-406-29-18149118/",
+    # "https://www.vseinstrumenti.ru/product/rezets-otreznoj-hiz-40h25h200-mm-t5k10-levyj-ri-406-30-18149160/",
+    # "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-25x16x140-mm-vk8-hiz-ri-411-11-15698740",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-podreznyh-otognutyh-levyh-4-sht-25x16x140-t15k6-gost-18880-73-hiz-510416u-14863421",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-tokarnyh-podreznyh-otognutyh-4-sht-25x16x140-t5k10-gost-18880-73-hiz-511416u-14863655",
+    # "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-vk8-2112-0015-25h20h140-mm-hiz-034982-865267",
+    # "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-hiz-25h20h140-mm-t5k10-levyj-ri-411-51-18188382",
+    # "https://www.vseinstrumenti.ru/product/rezets-podreznoj-otognutyj-t5k10-32h25h170-mm-hiz-2112-0065-033971-733831",
+    # "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-sibrteh-200-mm-dvuhkomponentnye-rukoyatki-17052-1211358",
+    # "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-180-mm-fosfatirovanie-trehkomponentnye-rukoyatki-sibrteh-17054-975907",
+    # "https://www.vseinstrumenti.ru/product/kombinirovannye-ploskogubtsy-matrix-pro-185-mm-usilennaya-sistema-17060-949018/",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-pryamoj-25x16x140-mm-vk8-hiz-ri-153-80-15698440",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-t5k10-hiz-ri-153-315-15777970",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-vk8-hiz-ri-153-62-15698572",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-vk8-levyj-hiz-ri-153-202-15698560",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-t15k6-hiz-ri-153-61-15698554",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-25x16x140-mm-t5k10-hiz-ri-153-60-15698530",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-32x20x170-mm-vk8-hiz-ri-153-205-15698512",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-hiz-32h20h170-mm-vk8-levyj-ri-153-208-18149592",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-32x20x170-mm-t5k10-hiz-ri-153-66-15698518",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-otognutyj-hiz-40h25h200-mm-t5k10-ri-153-69-18149964",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-vk8-hiz-ri-153-398-15697810",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-pryamoj-25x16x140-mm-t15k6-hiz-ri-153-285-15697798",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-vk8-hiz-ri-153-95-15698314",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-t15k6-hiz-ri-153-94-15698302",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-25x16x140-mm-t5k10-hiz-ri-153-93-15698308",
+    # "https://www.vseinstrumenti.ru/product/upakovka-reztsov-prohodnyh-upornyh-izognutyh-4-sht-levye-25x16x140-t5k10-gost-18879-73-tip-2-hiz-530416u-14864009",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-vk8-hiz-ri-153-98-15697828",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-t15k6-hiz-ri-153-97-15697822",
+    # "https://www.vseinstrumenti.ru/product/rezets-prohodnoj-upornyj-izognutyj-32x20x170-mm-t5k10-hiz-ri-153-96-15697816",
+    # "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-25x16x140-mm-t15k6-hiz-ri-410-11-15779128",
+    # "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-25x16x140-mm-t5k10-hiz-ri-410-12-15778858",
+    # "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-naruzhnoj-rezby-hiz-32h20h170-mm-t5k10-ri-410-18-18150132",
+    # "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-vnutrennej-rezby-16x16x170-mm-t5k10-hiz-ri-409-12-15778174",
+    # "https://www.vseinstrumenti.ru/product/rezets-rezbovoj-dlya-vnutrennej-rezby-25x25x240-mm-vk8-hiz-ri-409-28-15778804"
 ]
 
 OUTPUT_FILE = "prices.csv"
-PRICE_LOCATOR = '[data-qa="price-now"]'
+CURRENT_PRICE = '[data-qa="price-now"]'
+PERSONAL_PRICE = '[data-qa="personal-price"] a span:has-text("₽")'
+CITY_SELECTION_BUTTON = "button span:has-text('Указать другой')"
+MOSCOW_BUTTON = '[data-qa="location"] p:has-text("Москва")'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 
@@ -436,6 +441,11 @@ def test_get_all_prices_human_like_2(page_fixture):
     with allure.step("Переход на главную и прогрев страницы"):
         page.goto("https://www.vseinstrumenti.ru/", wait_until="domcontentloaded")
         human_delay(1.2, 2.5)
+        page.locator(CITY_SELECTION_BUTTON).click()
+        human_delay(1.2, 2.5)
+        page.locator(MOSCOW_BUTTON).click()
+        human_delay(1.2, 2.5)
+
         curr_url = page.url
         if re.search(r"/xpvnsulc|forbidden", curr_url) or page_contains_forbidden(page):
             solver.capcha_solver()
@@ -457,6 +467,7 @@ def test_get_all_prices_human_like_2(page_fixture):
             if page_contains_forbidden(page):
                 assert False, f"Тест остановлен: найден forbidden после перехода на url товара: {url}"
 
+
             solver.capcha_solver()
             human_delay(2, 3)
 
@@ -469,7 +480,10 @@ def test_get_all_prices_human_like_2(page_fixture):
 
         with allure.step("Наводим курсор на цену и считываем"):
             try:
-                price_element = page.locator(PRICE_LOCATOR)
+                if page.locator(PERSONAL_PRICE).is_visible():
+                    price_element = page.locator(PERSONAL_PRICE)
+                else:
+                    price_element = page.locator(CURRENT_PRICE)
                 price_element.wait_for(timeout=10000)
                 box = price_element.bounding_box()
                 if not box:
