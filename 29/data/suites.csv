@@ -1,0 +1,2 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","3224164","Сбор цен по всем товарам одним тестом","tests","Tue Aug 05 10:09:39 GMT 2025","passed","Tue Aug 05 11:03:24 GMT 2025","","test_pars","",""
