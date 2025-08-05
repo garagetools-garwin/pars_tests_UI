@@ -105,6 +105,12 @@ jobs:
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
 
+      - name: Upload prices.csv artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prices
+          path: prices.csv
+
   notify-on-failure:
     if: |
      (failure()) ||
