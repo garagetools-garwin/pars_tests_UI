@@ -441,12 +441,6 @@ def test_get_all_prices_human_like_2(page_fixture):
     with allure.step("Переход на главную и прогрев страницы"):
         page.goto("https://www.vseinstrumenti.ru/", wait_until="domcontentloaded")
         human_delay(1.2, 2.5)
-        page.locator('//span[contains(translate(text(), "МОСКВА", "москва"), "москва")]').wait_for(timeout=10000)
-        # page.locator(CITY_SELECTION_BUTTON).click()
-        # human_delay(1.2, 2.5)
-        # page.locator(MOSCOW_BUTTON).wait_for(timeout=60000)
-        # page.locator(MOSCOW_BUTTON).click()
-        # human_delay(1.2, 2.5)
 
         curr_url = page.url
         if re.search(r"/xpvnsulc|forbidden", curr_url) or page_contains_forbidden(page):
@@ -456,6 +450,13 @@ def test_get_all_prices_human_like_2(page_fixture):
             assert False, "Тест остановлен: найден forbidden после перехода на главную"
         solver.capcha_solver()
         human_delay(1.2, 2.5)
+
+        page.locator('//span[contains(translate(text(), "МОСКВА", "москва"), "москва")]').wait_for(timeout=10000)
+        # page.locator(CITY_SELECTION_BUTTON).click()
+        # human_delay(1.2, 2.5)
+        # page.locator(MOSCOW_BUTTON).wait_for(timeout=60000)
+        # page.locator(MOSCOW_BUTTON).click()
+        # human_delay(1.2, 2.5)
 
     for url in PRODUCT_URLS:
         with allure.step(f"Переход на товар: {url}"):
