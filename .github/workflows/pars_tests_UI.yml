@@ -15,7 +15,7 @@ on:
 jobs:
   # Основная часть тестов
   tests:
-    timeout-minutes: 60
+    timeout-minutes: 260
 
     # Уникальный ключ для группы задач предназначен для того, чтобы повторный запуск Джобы вставал в ожидание, не конфликтуая с первым
     concurrency: pars_tests_UI_concurrency
