@@ -144,6 +144,10 @@ jobs:
     needs: tests
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: prices
+          path: .
       - name: Send success email with prices.csv
         uses: dawidd6/action-send-mail@v3
         with:
