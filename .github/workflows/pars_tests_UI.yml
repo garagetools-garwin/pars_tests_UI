@@ -47,6 +47,11 @@ jobs:
       - name: Ensure browsers are installed
         run: python -m playwright install --with-deps
 
+      # Узнаю IP VM
+      - name: Print public IP
+        run: |
+          curl ifconfig.me || curl ipinfo.io/ip || curl icanhazip.com
+
       # Запуск тестов
       - name: Run tests
         run: |
