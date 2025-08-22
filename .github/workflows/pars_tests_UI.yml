@@ -116,19 +116,19 @@ jobs:
           name: prices
           path: prices.csv
 
-  # Автоматический перезапуск при падении
-  rerun-on-failure:
-    needs: tests
-    if: failure() && fromJSON(github.run_attempt) < 3  # Максимум 3 попытки
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - name: Trigger rerun
-        run: |
-          gh run rerun ${{ github.run_id }} --repo ${{ github.repository }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # # Автоматический перезапуск при падении
+  # rerun-on-failure:
+  #   needs: tests
+  #   if: failure() && fromJSON(github.run_attempt) < 3  # Максимум 3 попытки
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     actions: write
+  #   steps:
+  #     - name: Trigger rerun
+  #       run: |
+  #         gh run rerun ${{ github.run_id }} --repo ${{ github.repository }}
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify-on-failure:
     if: |
