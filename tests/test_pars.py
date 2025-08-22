@@ -452,7 +452,7 @@ OUTPUT_FILE = "prices.csv"
 CURRENT_PRICE = '[data-qa="price-now"]'
 PERSONAL_PRICE = '[data-qa="personal-price"] a span:has-text("₽")'
 CITY_SELECTION_BUTTON = "button span:has-text('Указать другой')"
-MOSCOW_BUTTON = '[data-qa="location"] p:has-text("Москвач")'
+MOSCOW_BUTTON = '[data-qa="location"] p:has-text("Москва")'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 
@@ -491,7 +491,7 @@ def test_get_all_prices_human_like_2(page_fixture):
         solver.capcha_solver()
         human_delay(1.2, 2.5)
 
-        page.locator('//span[contains(translate(text(), "МОСКВА", "москва"), "москва")]').wait_for(timeout=10000)
+        page.locator('//span[contains(translate(text(), "МОСКВАЧ", "москвач"), "москвач")]').wait_for(timeout=10000)
         # page.locator(CITY_SELECTION_BUTTON).click()
         # human_delay(1.2, 2.5)
         # page.locator(MOSCOW_BUTTON).wait_for(timeout=60000)
