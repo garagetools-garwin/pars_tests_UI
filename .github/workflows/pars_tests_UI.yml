@@ -121,7 +121,7 @@ jobs:
     steps:
       - name: Trigger rerun
         run: |
-          gh workflow run rerun.yml -F run_id=${{ github.run_id }}
+          gh run rerun ${{ github.run_id }} --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
