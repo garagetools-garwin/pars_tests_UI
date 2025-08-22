@@ -452,7 +452,7 @@ OUTPUT_FILE = "prices.csv"
 CURRENT_PRICE = '[data-qa="price-now"]'
 PERSONAL_PRICE = '[data-qa="personal-price"] a span:has-text("₽")'
 CITY_SELECTION_BUTTON = "button span:has-text('Указать другой')"
-MOSCOW_BUTTON = '[data-qa="location"] p:has-text("Москва")'
+MOSCOW_BUTTON = '[data-qa="location"] p:has-text("Москвач")'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 
