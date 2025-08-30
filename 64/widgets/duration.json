@@ -1,1 +1,1 @@
-[{"uid":"32fd9f5eb24cfb85","name":"Сбор цен по всем товарам одним тестом","time":{"start":1756534364386,"stop":1756535638645,"duration":1274259},"status":"failed","severity":"normal"}]
+[{"uid":"cd5dae4bc03e1d01","name":"Сбор цен по всем товарам одним тестом","time":{"start":1756535825900,"stop":1756535894584,"duration":68684},"status":"broken","severity":"normal"}]
