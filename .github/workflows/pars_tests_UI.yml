@@ -25,7 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ADMIN_BUYER_EMAIL: ${{ secrets.ADMIN_BUYER_EMAIL }}
-
+      GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+      GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+      
     steps:
 
       # Клонирование репозитория
@@ -184,3 +186,11 @@ jobs:
           to: urin.a@garagetools.ru
           from: GitHub Actions <${{ secrets.GMAIL_USERNAME }}>
           attachments: prices.csv
+
+      - name: Upload prices.csv to Google Drive
+        if: success()
+        uses: adityak74/google-drive-upload-github-action@main
+        with:
+          filename: prices.csv
+          folderId: ${{ secrets.GDRIVE_FOLDER_ID }}
+          credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
