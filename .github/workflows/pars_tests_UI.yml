@@ -187,10 +187,10 @@ jobs:
           from: GitHub Actions <${{ secrets.GMAIL_USERNAME }}>
           attachments: prices.csv
 
-      - name: Upload prices.csv to Google Drive
-        uses: willo32/google-drive-upload-action@v1
-        with:
-          credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
-          parent_folder_id: ${{ secrets.GDRIVE_FOLDER_ID }}
-          target: prices.csv
-          name: prices.csv
+      # - name: Upload prices.csv to Google Drive
+      #   uses: willo32/google-drive-upload-action@v1
+      #   with:
+      #     credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
+      #     parent_folder_id: ${{ secrets.GDRIVE_FOLDER_ID }}
+      #     target: prices.csv
+      #     name: prices.csv
