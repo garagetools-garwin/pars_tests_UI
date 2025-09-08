@@ -187,6 +187,17 @@ jobs:
           from: GitHub Actions <${{ secrets.GMAIL_USERNAME }}>
           attachments: prices.csv
 
+      - name: Commit prices.csv to data branch
+        run: |
+          git config --global user.email "urin.a@garagetools.ru"
+          git config --global user.name "GitHub Actions Bot"
+          git checkout -B data
+          mkdir -p data
+          mv prices.csv data/prices.csv
+          git add data/prices.csv
+          git commit -m "Update prices.csv" || echo "No changes"
+          git push origin data --force
+
       # - name: Upload prices.csv to Google Drive
       #   uses: willo32/google-drive-upload-action@v1
       #   with:
