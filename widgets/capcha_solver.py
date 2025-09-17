@@ -83,9 +83,9 @@ class SyncCaptchaSlider:
                 distance = self.solve_captcha_gemini(image) if image else None
                 if distance is None:
                     print("Нет ответа от нейронки, двигаем на 90 пикселей")
-                    distance = 100.0
+                    distance = 101.0
             else:
-                distance = 100.0
+                distance = 101.0
 
             self.human_like_drag(slider_button, distance)
 
