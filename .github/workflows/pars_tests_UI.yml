@@ -73,7 +73,7 @@ jobs:
         run: proxychains curl https://httpbin.org/ip
 
       - name: proxy test
-        run: proxychains chromium --headless --disable-gpu --dump-dom https://httpbin.org/ip
+        run: proxychains chromium --headless --disable-gpu --no-sandbox --dump-dom https://httpbin.org/ip
 
       # Запуск тестов
       - name: Run tests
