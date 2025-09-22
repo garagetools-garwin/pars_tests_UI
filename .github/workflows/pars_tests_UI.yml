@@ -69,6 +69,9 @@ jobs:
         run: |
           curl ifconfig.me || curl ipinfo.io/ip || curl icanhazip.com
 
+      - name: proxy test
+        run: proxychains curl https://httpbin.org/ip
+
       # Запуск тестов
       - name: Run tests
         run: |
