@@ -332,7 +332,7 @@ from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
 #TODO на каждой странице проверять либо цену либо отсутствие цены (нет в наличии), либо капчу
 #TODO
 """Тест законсервирован до лучших времен куки с автоматизации не подходят"""
-def test_ip(proxy_browser):
+def test_ip(page_fixture):
     page = proxy_browser.new_page()
     page.goto("https://httpbin.org/ip")
     ip_info = page.text_content("body")
