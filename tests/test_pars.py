@@ -333,7 +333,7 @@ from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
 #TODO
 """Тест законсервирован до лучших времен куки с автоматизации не подходят"""
 def test_ip(page_fixture):
-    page = proxy_browser.new_page()
+    page = page_fixture()
     page.goto("https://httpbin.org/ip")
     ip_info = page.text_content("body")
     print(ip_info)
