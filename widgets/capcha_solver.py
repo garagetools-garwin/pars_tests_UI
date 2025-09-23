@@ -12,6 +12,8 @@ import allure
 import requests
 from playwright.sync_api import Page
 from dotenv import load_dotenv
+import math
+
 
 from conftest import ensure_auth_states_dir_exists
 
@@ -107,14 +109,14 @@ class SyncCaptchaSlider:
         print("Не удалось пройти капчу за 10 попыток")
         return False
 
-    def prepare_human_like_environment(self):
-        self.page.context.set_default_timeout(60000)
-        self.page.add_init_script("""
-            Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-            Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
-            Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
-            window.chrome = { runtime: {} };
-        """)
+    # def prepare_human_like_environment(self):
+    #     self.page.context.set_default_timeout(60000)
+    #     self.page.add_init_script("""
+    #         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+    #         Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
+    #         Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+    #         window.chrome = { runtime: {} };
+    #     """)
 
     def wait_for_captcha_load(self, timeout: int = 15000) -> bool:
         try:
@@ -176,126 +178,194 @@ class SyncCaptchaSlider:
             print(f"Gemini error: {e}")
         return None
 
-    def human_like_drag(self, slider, target_distance: float) -> bool:
-        try:
-            box = slider.bounding_box()
-            if not box:
-                print("Не удалось получить координаты ползунка")
-                return False
+    """Старый, рабочий драг"""
 
-            # [1] Задержка перед началом - имитация реакции человека (например, 0.7-2.3 сек)
-            think_delay = random.uniform(0.7, 2.3)
-            print(f"Жду перед действием (имитируем раздумье): {think_delay:.2f} сек")
-            time.sleep(think_delay)
+    # def human_like_drag(self, slider, target_distance: float) -> bool:
+    #     try:
+    #         box = slider.bounding_box()
+    #         if not box:
+    #             print("Не удалось получить координаты ползунка")
+    #             return False
+    #
+    #         # [1] Задержка перед началом - имитация реакции человека (например, 0.7-2.3 сек)
+    #         think_delay = random.uniform(0.7, 2.3)
+    #         print(f"Жду перед действием (имитируем раздумье): {think_delay:.2f} сек")
+    #         time.sleep(think_delay)
+    #
+    #         start_x = box['x'] + box['width'] / 2
+    #         start_y = box['y'] + box['height'] / 2
+    #
+    #         # [2] Наводим мышь к слайдеру с паузами (движение поступательно, не в одну линию)
+    #         approach_steps = random.randint(5, 8)
+    #         approach_path = []
+    #         for i in range(approach_steps):
+    #             progress = (i + 1) / approach_steps
+    #             inter_x = start_x * progress + (start_x - 150) * (1 - progress) + random.uniform(-8, 8)
+    #             inter_y = start_y + random.uniform(-3, 3)
+    #             approach_path.append((inter_x, inter_y))
+    #         # старт вне зоны, к кнопке с задержками
+    #         self.page.mouse.move(start_x - 150, start_y + random.randint(-10, 10))
+    #         for (x, y) in approach_path:
+    #             self.page.mouse.move(x, y)
+    #             time.sleep(random.uniform(0.06, 0.14))
+    #         # финальное наведение точно на кнопку
+    #         self.page.mouse.move(start_x, start_y)
+    #         time.sleep(random.uniform(0.09, 0.20))
+    #
+    #         # [3] Держим кнопку вниз
+    #         self.page.mouse.down()
+    #         time.sleep(random.uniform(0.03, 0.09))
+    #
+    #         # [4] Движение с рывками, мини-ступеньками, неравномерно, иногда полностью останавливаемся или дергаем мышку назад или вниз
+    #         path_steps = random.randint(18, 29)
+    #         for i in range(path_steps):
+    #             progress = (i + 1) / path_steps
+    #             # "нервность" — иногда слегка уходим в минус/назад или чуть вниз
+    #             jitter_back = -3 if (random.random() < 0.08 and i > 0) else 0
+    #             jitter_x = random.uniform(-1.5, 1.5) + jitter_back
+    #             jitter_y = random.uniform(-2.3, 2.3)
+    #             if random.random() < 0.12 and i > 4:
+    #                 # Иногда неожиданно делаем паузу прям секундную на середине!
+    #                 print("Пауза внутри движения!")
+    #                 time.sleep(random.uniform(0.12, 0.30))
+    #             # делаем рывок более "ступенчатым"
+    #             step_base = target_distance * progress
+    #             extra_jerk = random.uniform(-2, 3) if (i % 7 == 0) else 0
+    #             cur = step_base + jitter_x + extra_jerk
+    #             self.page.mouse.move(start_x + cur, start_y + jitter_y)
+    #             time.sleep(random.uniform(0.018, 0.057))
+    #         # финальная точка (имитация недодвига и потом быстрого дохвата)
+    #         self.page.mouse.move(start_x + target_distance - random.randint(1, 6), start_y + random.randint(-2, 2))
+    #         time.sleep(random.uniform(0.07, 0.145))
+    #         self.page.mouse.move(start_x + target_distance, start_y)
+    #         time.sleep(random.uniform(0.06, 0.12))
+    #         self.page.mouse.up()
+    #         print("Человеческое движение завершено")
+    #         return True
+    #     except Exception as e:
+    #         print(f"Ошибка drag: {e}")
+    #         return False
 
-            start_x = box['x'] + box['width'] / 2
-            start_y = box['y'] + box['height'] / 2
-
-            # [2] Наводим мышь к слайдеру с паузами (движение поступательно, не в одну линию)
-            approach_steps = random.randint(5, 8)
-            approach_path = []
-            for i in range(approach_steps):
-                progress = (i + 1) / approach_steps
-                inter_x = start_x * progress + (start_x - 150) * (1 - progress) + random.uniform(-8, 8)
-                inter_y = start_y + random.uniform(-3, 3)
-                approach_path.append((inter_x, inter_y))
-            # старт вне зоны, к кнопке с задержками
-            self.page.mouse.move(start_x - 150, start_y + random.randint(-10, 10))
-            for (x, y) in approach_path:
-                self.page.mouse.move(x, y)
-                time.sleep(random.uniform(0.06, 0.14))
-            # финальное наведение точно на кнопку
-            self.page.mouse.move(start_x, start_y)
-            time.sleep(random.uniform(0.09, 0.20))
-
-            # [3] Держим кнопку вниз
-            self.page.mouse.down()
-            time.sleep(random.uniform(0.03, 0.09))
-
-            # [4] Движение с рывками, мини-ступеньками, неравномерно, иногда полностью останавливаемся или дергаем мышку назад или вниз
-            path_steps = random.randint(18, 29)
-            for i in range(path_steps):
-                progress = (i + 1) / path_steps
-                # "нервность" — иногда слегка уходим в минус/назад или чуть вниз
-                jitter_back = -3 if (random.random() < 0.08 and i > 0) else 0
-                jitter_x = random.uniform(-1.5, 1.5) + jitter_back
-                jitter_y = random.uniform(-2.3, 2.3)
-                if random.random() < 0.12 and i > 4:
-                    # Иногда неожиданно делаем паузу прям секундную на середине!
-                    print("Пауза внутри движения!")
-                    time.sleep(random.uniform(0.12, 0.30))
-                # делаем рывок более "ступенчатым"
-                step_base = target_distance * progress
-                extra_jerk = random.uniform(-2, 3) if (i % 7 == 0) else 0
-                cur = step_base + jitter_x + extra_jerk
-                self.page.mouse.move(start_x + cur, start_y + jitter_y)
-                time.sleep(random.uniform(0.018, 0.057))
-            # финальная точка (имитация недодвига и потом быстрого дохвата)
-            self.page.mouse.move(start_x + target_distance - random.randint(1, 6), start_y + random.randint(-2, 2))
-            time.sleep(random.uniform(0.07, 0.145))
-            self.page.mouse.move(start_x + target_distance, start_y)
-            time.sleep(random.uniform(0.06, 0.12))
-            self.page.mouse.up()
-            print("Человеческое движение завершено")
-            return True
-        except Exception as e:
-            print(f"Ошибка drag: {e}")
+    def human_like_drag(self, slider, target_distance):
+        box = slider.bounding_box()
+        if not box:
+            print("Не удалось получить координаты ползунка")
             return False
 
-    def move_slider_fixed_90_pixels(self):
-        max_attempts = 10
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True, args=[
-                '--disable-blink-features=AutomationControlled',
-                '--disable-web-security',
-                '--disable-features=IsolateOrigins,site-per-process',
-                '--window-size=1366,768',
-            ])
-            context = browser.new_context(
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                viewport={'width': 1366, 'height': 768}
-            )
-            page = context.new_page()
-            page.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-                Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
-                Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
-                window.chrome = { runtime: {} };
-            """)
+        start_x = box['x'] + box['width'] / 2
+        start_y = box['y'] + box['height'] / 2
 
-            page.goto("https://www.vseinstrumenti.ru/", wait_until='networkidle')
-            if page_contains_forbidden(self.page):
-                assert False, "Тест остановлен: найден forbidden после открытия страницы"
+        time.sleep(random.uniform(0.9, 2.5))
 
-            solver = SyncCaptchaSlider(page)
-            result = solver.solve_with_retries(max_attempts=max_attempts)
-            assert result, "Не удалось пройти капчу за 10 попыток"
-            browser.close()
+        # Подход к слайдеру с паузами и "промахами"
+        self.page.mouse.move(start_x - 140, start_y + random.randint(-12, 10))
+        for i in range(random.randint(3, 6)):
+            nx = start_x + random.uniform(-16, 16)
+            ny = start_y + random.uniform(-9, 12)
+            self.page.mouse.move(nx, ny)
+            time.sleep(random.uniform(0.13, 0.25))
 
-    @pytest.mark.parametrize("run", range(1))
-    def captcha_solver_gemini_with_retries(self ,run):
-        gemini_api_key = GEMINI_API_KEY
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=False, args=[
-                '--disable-blink-features=AutomationControlled',
-                '--disable-web-security',
-                '--disable-features=IsolateOrigins,site-per-process',
-                '--window-size=1366,768',
-            ])
-            context = browser.new_context(
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                viewport={'width': 1366, 'height': 768}
-            )
-            page = context.new_page()
-            page.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-                Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
-                Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
-                window.chrome = { runtime: {} };
-            """)
+        # Начало drag с редкой "осечкой"
+        self.page.mouse.move(start_x, start_y)
+        self.page.mouse.down()
+        time.sleep(random.uniform(0.08, 0.18))
 
-            page.goto("https://www.vseinstrumenti.ru/", wait_until='networkidle')
-            solver = SyncCaptchaSlider(page, gemini_api_key=gemini_api_key)
-            result = solver.solve_with_retries(gemini_mode=True, max_attempts=10)
-            assert result, "Не удалось пройти капчу за 10 попыток"
-            browser.close()
+        total_steps = random.randint(20, 36)
+        for step in range(total_steps):
+            progress = (step + 1) / total_steps
+            # Экспоненциальная кривая: в начале быстрее, к концу - медленнее
+            accel = math.sin(progress * math.pi / 2)
+            cur_x = start_x + min(target_distance, target_distance * accel + random.uniform(-4, 4))
+            cur_y = start_y + math.sin(step / 3.7) * random.uniform(-3.5, 3.5)
+
+            self.page.mouse.move(cur_x, cur_y)
+            # Особо длинная пауза в середине drag
+            if step == total_steps // 2 and random.random() < 0.23:
+                time.sleep(random.uniform(0.18, 0.4))
+            else:
+                time.sleep(random.uniform(0.028, 0.095))
+
+            # rare fake fail with bounce backwards and continue again
+            if random.random() < 0.06 and 0.2 < progress < 0.7:
+                back_x = cur_x - random.uniform(12, 35)
+                self.page.mouse.move(back_x, cur_y + random.uniform(-8, 8))
+                time.sleep(random.uniform(0.11, 0.23))
+                self.page.mouse.move(cur_x, cur_y)
+                time.sleep(random.uniform(0.09, 0.16))
+
+        # Иногда делай double-drag (имитация нерешительности)
+        if random.random() < 0.17:
+            self.page.mouse.up()
+            time.sleep(random.uniform(0.25, 0.7))
+            self.page.mouse.down()
+            time.sleep(random.uniform(0.03, 0.11))
+            self.page.mouse.move(start_x + target_distance + random.uniform(-4, 4), start_y + random.uniform(-3, 3))
+
+        # Финальная доработка — специально не доходить до 100%, а потом "добросить"
+        self.page.mouse.move(start_x + target_distance - random.uniform(5, 15), start_y + random.uniform(-3, 2))
+        time.sleep(random.uniform(0.09, 0.22))
+        self.page.mouse.move(start_x + target_distance, start_y)
+        time.sleep(random.uniform(0.06, 0.14))
+        self.page.mouse.up()
+        print("Реалистичный drag завершен")
+
+        return True
+
+
+    # def move_slider_fixed_90_pixels(self):
+    #     max_attempts = 10
+    #     with sync_playwright() as p:
+    #         browser = p.chromium.launch(headless=True, args=[
+    #             '--disable-blink-features=AutomationControlled',
+    #             '--disable-web-security',
+    #             '--disable-features=IsolateOrigins,site-per-process',
+    #             '--window-size=1366,768',
+    #         ])
+    #         context = browser.new_context(
+    #             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    #             viewport={'width': 1366, 'height': 768}
+    #         )
+    #         page = context.new_page()
+    #         page.add_init_script("""
+    #             Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+    #             Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
+    #             Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+    #             window.chrome = { runtime: {} };
+    #         """)
+    #
+    #         page.goto("https://www.vseinstrumenti.ru/", wait_until='networkidle')
+    #         if page_contains_forbidden(self.page):
+    #             assert False, "Тест остановлен: найден forbidden после открытия страницы"
+    #
+    #         solver = SyncCaptchaSlider(page)
+    #         result = solver.solve_with_retries(max_attempts=max_attempts)
+    #         assert result, "Не удалось пройти капчу за 10 попыток"
+    #         browser.close()
+
+    # @pytest.mark.parametrize("run", range(1))
+    # def captcha_solver_gemini_with_retries(self ,run):
+    #     gemini_api_key = GEMINI_API_KEY
+    #     with sync_playwright() as p:
+    #         browser = p.chromium.launch(headless=False, args=[
+    #             '--disable-blink-features=AutomationControlled',
+    #             '--disable-web-security',
+    #             '--disable-features=IsolateOrigins,site-per-process',
+    #             '--window-size=1366,768',
+    #         ])
+    #         context = browser.new_context(
+    #             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    #             viewport={'width': 1366, 'height': 768}
+    #         )
+    #         page = context.new_page()
+    #         page.add_init_script("""
+    #             Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+    #             Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
+    #             Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+    #             window.chrome = { runtime: {} };
+    #         """)
+    #
+    #         page.goto("https://www.vseinstrumenti.ru/", wait_until='networkidle')
+    #         solver = SyncCaptchaSlider(page, gemini_api_key=gemini_api_key)
+    #         result = solver.solve_with_retries(gemini_mode=True, max_attempts=10)
+    #         assert result, "Не удалось пройти капчу за 10 попыток"
+    #         browser.close()
