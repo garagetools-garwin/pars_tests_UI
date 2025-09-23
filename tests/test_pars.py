@@ -10,6 +10,8 @@ import pytest
 import allure
 from playwright.sync_api import Page
 from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
+import math
+
 
 """Хороший тест с рабочими куками, но куки сделаные локально не подходят для CI"""
 
