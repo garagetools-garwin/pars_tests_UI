@@ -1,0 +1,18 @@
+name: AutoRerun Failed Pars Tests
+on:
+  workflow_run:
+    workflows: ["pars_tests_UI"]
+    types:
+      - completed
+jobs:
+  rerun-on-failure:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt < 3 }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger auto rerun
+        run: |
+          gh run rerun ${{ github.event.workflow_run.id }} --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

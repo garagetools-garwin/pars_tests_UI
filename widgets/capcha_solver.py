@@ -14,7 +14,6 @@ from playwright.sync_api import Page
 from dotenv import load_dotenv
 import math
 
-
 from conftest import ensure_auth_states_dir_exists
 
 load_dotenv()
@@ -342,30 +341,30 @@ class SyncCaptchaSlider:
     #         assert result, "Не удалось пройти капчу за 10 попыток"
     #         browser.close()
 
-    # @pytest.mark.parametrize("run", range(1))
-    # def captcha_solver_gemini_with_retries(self ,run):
-    #     gemini_api_key = GEMINI_API_KEY
-    #     with sync_playwright() as p:
-    #         browser = p.chromium.launch(headless=False, args=[
-    #             '--disable-blink-features=AutomationControlled',
-    #             '--disable-web-security',
-    #             '--disable-features=IsolateOrigins,site-per-process',
-    #             '--window-size=1366,768',
-    #         ])
-    #         context = browser.new_context(
-    #             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    #             viewport={'width': 1366, 'height': 768}
-    #         )
-    #         page = context.new_page()
-    #         page.add_init_script("""
-    #             Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-    #             Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
-    #             Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
-    #             window.chrome = { runtime: {} };
-    #         """)
-    #
-    #         page.goto("https://www.vseinstrumenti.ru/", wait_until='networkidle')
-    #         solver = SyncCaptchaSlider(page, gemini_api_key=gemini_api_key)
-    #         result = solver.solve_with_retries(gemini_mode=True, max_attempts=10)
-    #         assert result, "Не удалось пройти капчу за 10 попыток"
-    #         browser.close()
+    @pytest.mark.parametrize("run", range(1))
+    def captcha_solver_gemini_with_retries(self ,run):
+        gemini_api_key = GEMINI_API_KEY
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=False, args=[
+                '--disable-blink-features=AutomationControlled',
+                '--disable-web-security',
+                '--disable-features=IsolateOrigins,site-per-process',
+                '--window-size=1366,768',
+            ])
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                viewport={'width': 1366, 'height': 768}
+            )
+            page = context.new_page()
+            page.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
+                Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+                window.chrome = { runtime: {} };
+            """)
+
+            page.goto("https://www.vseinstrumenti.ru/", wait_until='networkidle')
+            solver = SyncCaptchaSlider(page, gemini_api_key=gemini_api_key)
+            result = solver.solve_with_retries(gemini_mode=True, max_attempts=10)
+            assert result, "Не удалось пройти капчу за 10 попыток"
+            browser.close()

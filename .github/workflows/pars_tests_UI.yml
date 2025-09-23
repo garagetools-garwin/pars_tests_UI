@@ -8,24 +8,30 @@ on:
   # pull_request:
   #   branches: [ main, master ]
   schedule:
-    - cron: '0 7 * * *'    
+    - cron: '0 5 * * *'    
     # - cron: '0 14 * * *'
 
 # Определение Задачи(job)
 jobs:
   # Основная часть тестов
   tests:
-    timeout-minutes: 60
+    timeout-minutes: 260
 
     # Уникальный ключ для группы задач предназначен для того, чтобы повторный запуск Джобы вставал в ожидание, не конфликтуая с первым
     concurrency: pars_tests_UI_concurrency
 
     # запуск на виртуальной машине
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && (github.event.schedule == '0 7 * * *' || github.event.schedule == '0 14 * * *'))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && (github.event.schedule == '0 5 * * *' || github.event.schedule == '0 14 * * *'))
     runs-on: ubuntu-latest
     env:
       ADMIN_BUYER_EMAIL: ${{ secrets.ADMIN_BUYER_EMAIL }}
-
+      GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+      GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+      PROXY_HOST: ${{ secrets.PROXY_HOST }}
+      PROXY_PORT: ${{ secrets.PROXY_PORT }}
+      PROXY_USER: ${{ secrets.PROXY_USER }}
+      PROXY_PASS: ${{ secrets.PROXY_PASS }}
+      
     steps:
 
       # Клонирование репозитория
@@ -43,14 +49,36 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # - name: Install proxychains
+      #   run: sudo apt-get update && sudo apt-get install -y proxychains4
+
+      # - name: Setup proxychains.conf (from secrets)
+      #   run: |
+      #     echo "dynamic_chain" > proxychains.conf
+      #     echo "proxy_dns" >> proxychains.conf
+      #     echo "[ProxyList]" >> proxychains.conf
+      #     echo "socks5 ${{ secrets.DANTE_HOST }} ${{ secrets.DANTE_PORT }} ${{ secrets.DANTE_USER }} ${{ secrets.DANTE_PASS }}" >> proxychains.conf
+      #     sudo cp proxychains.conf /etc/proxychains.conf
+
       # Установка браузеров
       - name: Ensure browsers are installed
         run: python -m playwright install --with-deps
 
+      # Узнаю IP VM
+      - name: Print public IP
+        run: |
+          curl ifconfig.me || curl ipinfo.io/ip || curl icanhazip.com
+
+      # - name: proxy test
+      #   run: proxychains curl https://httpbin.org/ip
+
+      # - name: proxy test
+      #   run: proxychains chromium --headless --disable-gpu --no-sandbox --dump-dom https://httpbin.org/ip
+
       # Запуск тестов
       - name: Run tests
         run: |
-          pytest --reruns 2 --reruns-delay 3 --alluredir=allure-results
+          pytest --alluredir=allure-results
           
       # Проверка наличия json-файлов в allure-results (чтобы не запушить сломаный отчет)
       - name: Check if Allure results exist
@@ -111,6 +139,20 @@ jobs:
           name: prices
           path: prices.csv
 
+  # # Автоматический перезапуск при падении
+  # rerun-on-failure:
+  #   needs: tests
+  #   if: failure() && fromJSON(github.run_attempt) < 3  # Максимум 3 попытки
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     actions: write
+  #   steps:
+  #     - name: Trigger rerun
+  #       run: |
+  #         gh run rerun ${{ github.run_id }} --repo ${{ github.repository }}
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   notify-on-failure:
     if: |
      (failure()) ||
@@ -165,3 +207,22 @@ jobs:
           to: urin.a@garagetools.ru
           from: GitHub Actions <${{ secrets.GMAIL_USERNAME }}>
           attachments: prices.csv
+
+      - name: Commit prices.csv to data branch
+        run: |
+          git config --global user.email "urin.a@garagetools.ru"
+          git config --global user.name "GitHub Actions Bot"
+          git checkout -B data
+          mkdir -p data
+          mv prices.csv data/prices.csv
+          git add data/prices.csv
+          git commit -m "Update prices.csv" || echo "No changes"
+          git push origin data --force
+
+      # - name: Upload prices.csv to Google Drive
+      #   uses: willo32/google-drive-upload-action@v1
+      #   with:
+      #     credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
+      #     parent_folder_id: ${{ secrets.GDRIVE_FOLDER_ID }}
+      #     target: prices.csv
+      #     name: prices.csv

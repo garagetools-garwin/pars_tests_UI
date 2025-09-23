@@ -10,6 +10,8 @@ import pytest
 import allure
 from playwright.sync_api import Page
 from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
+import math
+
 
 """Хороший тест с рабочими куками, но куки сделаные локально не подходят для CI"""
 
@@ -332,7 +334,11 @@ from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
 #TODO на каждой странице проверять либо цену либо отсутствие цены (нет в наличии), либо капчу
 #TODO
 """Тест законсервирован до лучших времен куки с автоматизации не подходят"""
-
+# def test_ip(page_fixture):
+#     page = page_fixture()
+#     page.goto("https://httpbin.org/ip")
+#     ip_info = page.text_content("body")
+#     print(ip_info)
 
 
 """Начало рабочего теста"""
