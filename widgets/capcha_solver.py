@@ -244,69 +244,69 @@ class SyncCaptchaSlider:
 
 
     def human_like_drag(self, slider, target_distance):
-    box = slider.bounding_box()
-    if not box:
-        print("Не удалось получить координаты ползунка")
-        return False
-
-    start_x = box['x'] + box['width'] / 2
-    start_y = box['y'] + box['height'] / 2
-
-    time.sleep(random.uniform(0.9, 2.5))
-
-    # Подход к слайдеру с паузами и "промахами"
-    self.page.mouse.move(start_x - 140, start_y + random.randint(-12, 10))
-    for i in range(random.randint(3, 6)):
-        nx = start_x + random.uniform(-16, 16)
-        ny = start_y + random.uniform(-9, 12)
-        self.page.mouse.move(nx, ny)
-        time.sleep(random.uniform(0.13, 0.25))
-
-    # Начало drag с редкой "осечкой"
-    self.page.mouse.move(start_x, start_y)
-    self.page.mouse.down()
-    time.sleep(random.uniform(0.08, 0.18))
-
-    total_steps = random.randint(20, 36)
-    for step in range(total_steps):
-        progress = (step + 1) / total_steps
-        # Экспоненциальная кривая: в начале быстрее, к концу - медленнее
-        accel = math.sin(progress * math.pi / 2)
-        cur_x = start_x + min(target_distance, target_distance * accel + random.uniform(-4, 4))
-        cur_y = start_y + math.sin(step / 3.7) * random.uniform(-3.5, 3.5)
-
-        self.page.mouse.move(cur_x, cur_y)
-        # Особо длинная пауза в середине drag
-        if step == total_steps // 2 and random.random() < 0.23:
-            time.sleep(random.uniform(0.18, 0.4))
-        else:
-            time.sleep(random.uniform(0.028, 0.095))
-
-        # rare fake fail with bounce backwards and continue again
-        if random.random() < 0.06 and 0.2 < progress < 0.7:
-            back_x = cur_x - random.uniform(12, 35)
-            self.page.mouse.move(back_x, cur_y + random.uniform(-8, 8))
-            time.sleep(random.uniform(0.11, 0.23))
-            self.page.mouse.move(cur_x, cur_y)
-            time.sleep(random.uniform(0.09, 0.16))
-
-    # Иногда делай double-drag (имитация нерешительности)
-    if random.random() < 0.17:
-        self.page.mouse.up()
-        time.sleep(random.uniform(0.25, 0.7))
+        box = slider.bounding_box()
+        if not box:
+            print("Не удалось получить координаты ползунка")
+            return False
+    
+        start_x = box['x'] + box['width'] / 2
+        start_y = box['y'] + box['height'] / 2
+    
+        time.sleep(random.uniform(0.9, 2.5))
+    
+        # Подход к слайдеру с паузами и "промахами"
+        self.page.mouse.move(start_x - 140, start_y + random.randint(-12, 10))
+        for i in range(random.randint(3, 6)):
+            nx = start_x + random.uniform(-16, 16)
+            ny = start_y + random.uniform(-9, 12)
+            self.page.mouse.move(nx, ny)
+            time.sleep(random.uniform(0.13, 0.25))
+    
+        # Начало drag с редкой "осечкой"
+        self.page.mouse.move(start_x, start_y)
         self.page.mouse.down()
-        time.sleep(random.uniform(0.03, 0.11))
-        self.page.mouse.move(start_x + target_distance + random.uniform(-4, 4), start_y + random.uniform(-3, 3))
-
-    # Финальная доработка — специально не доходить до 100%, а потом "добросить"
-    self.page.mouse.move(start_x + target_distance - random.uniform(5, 15), start_y + random.uniform(-3, 2))
-    time.sleep(random.uniform(0.09, 0.22))
-    self.page.mouse.move(start_x + target_distance, start_y)
-    time.sleep(random.uniform(0.06, 0.14))
-    self.page.mouse.up()
-    print("Реалистичный drag завершен")
-
-    return True
+        time.sleep(random.uniform(0.08, 0.18))
+    
+        total_steps = random.randint(20, 36)
+        for step in range(total_steps):
+            progress = (step + 1) / total_steps
+            # Экспоненциальная кривая: в начале быстрее, к концу - медленнее
+            accel = math.sin(progress * math.pi / 2)
+            cur_x = start_x + min(target_distance, target_distance * accel + random.uniform(-4, 4))
+            cur_y = start_y + math.sin(step / 3.7) * random.uniform(-3.5, 3.5)
+    
+            self.page.mouse.move(cur_x, cur_y)
+            # Особо длинная пауза в середине drag
+            if step == total_steps // 2 and random.random() < 0.23:
+                time.sleep(random.uniform(0.18, 0.4))
+            else:
+                time.sleep(random.uniform(0.028, 0.095))
+    
+            # rare fake fail with bounce backwards and continue again
+            if random.random() < 0.06 and 0.2 < progress < 0.7:
+                back_x = cur_x - random.uniform(12, 35)
+                self.page.mouse.move(back_x, cur_y + random.uniform(-8, 8))
+                time.sleep(random.uniform(0.11, 0.23))
+                self.page.mouse.move(cur_x, cur_y)
+                time.sleep(random.uniform(0.09, 0.16))
+    
+        # Иногда делай double-drag (имитация нерешительности)
+        if random.random() < 0.17:
+            self.page.mouse.up()
+            time.sleep(random.uniform(0.25, 0.7))
+            self.page.mouse.down()
+            time.sleep(random.uniform(0.03, 0.11))
+            self.page.mouse.move(start_x + target_distance + random.uniform(-4, 4), start_y + random.uniform(-3, 3))
+    
+        # Финальная доработка — специально не доходить до 100%, а потом "добросить"
+        self.page.mouse.move(start_x + target_distance - random.uniform(5, 15), start_y + random.uniform(-3, 2))
+        time.sleep(random.uniform(0.09, 0.22))
+        self.page.mouse.move(start_x + target_distance, start_y)
+        time.sleep(random.uniform(0.06, 0.14))
+        self.page.mouse.up()
+        print("Реалистичный drag завершен")
+    
+        return True
 
 
     def move_slider_fixed_90_pixels(self):
