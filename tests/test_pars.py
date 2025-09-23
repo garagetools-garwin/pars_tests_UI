@@ -332,11 +332,11 @@ from widgets.capcha_solver import SyncCaptchaSlider, page_contains_forbidden
 #TODO на каждой странице проверять либо цену либо отсутствие цены (нет в наличии), либо капчу
 #TODO
 """Тест законсервирован до лучших времен куки с автоматизации не подходят"""
-def test_ip(page_fixture):
-    page = page_fixture()
-    page.goto("https://httpbin.org/ip")
-    ip_info = page.text_content("body")
-    print(ip_info)
+# def test_ip(page_fixture):
+#     page = page_fixture()
+#     page.goto("https://httpbin.org/ip")
+#     ip_info = page.text_content("body")
+#     print(ip_info)
 
 import csv
 import os
@@ -462,7 +462,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 
 @allure.title("Сбор цен по всем товарам одним тестом")
-def get_all_prices_human_like_2(page_fixture):
+def test_get_all_prices_human_like_2(page_fixture):
     page = page_fixture()
     solver = SyncCaptchaSlider(page)
     price_results = []
