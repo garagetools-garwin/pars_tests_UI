@@ -49,16 +49,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install proxychains
-        run: sudo apt-get update && sudo apt-get install -y proxychains4
+      # - name: Install proxychains
+      #   run: sudo apt-get update && sudo apt-get install -y proxychains4
 
-      - name: Setup proxychains.conf (from secrets)
-        run: |
-          echo "dynamic_chain" > proxychains.conf
-          echo "proxy_dns" >> proxychains.conf
-          echo "[ProxyList]" >> proxychains.conf
-          echo "socks5 ${{ secrets.DANTE_HOST }} ${{ secrets.DANTE_PORT }} ${{ secrets.DANTE_USER }} ${{ secrets.DANTE_PASS }}" >> proxychains.conf
-          sudo cp proxychains.conf /etc/proxychains.conf
+      # - name: Setup proxychains.conf (from secrets)
+      #   run: |
+      #     echo "dynamic_chain" > proxychains.conf
+      #     echo "proxy_dns" >> proxychains.conf
+      #     echo "[ProxyList]" >> proxychains.conf
+      #     echo "socks5 ${{ secrets.DANTE_HOST }} ${{ secrets.DANTE_PORT }} ${{ secrets.DANTE_USER }} ${{ secrets.DANTE_PASS }}" >> proxychains.conf
+      #     sudo cp proxychains.conf /etc/proxychains.conf
 
       # Установка браузеров
       - name: Ensure browsers are installed
@@ -69,11 +69,11 @@ jobs:
         run: |
           curl ifconfig.me || curl ipinfo.io/ip || curl icanhazip.com
 
-      - name: proxy test
-        run: proxychains curl https://httpbin.org/ip
+      # - name: proxy test
+      #   run: proxychains curl https://httpbin.org/ip
 
-      - name: proxy test
-        run: proxychains chromium --headless --disable-gpu --no-sandbox --dump-dom https://httpbin.org/ip
+      # - name: proxy test
+      #   run: proxychains chromium --headless --disable-gpu --no-sandbox --dump-dom https://httpbin.org/ip
 
       # Запуск тестов
       - name: Run tests
