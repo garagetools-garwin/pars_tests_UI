@@ -541,7 +541,7 @@ def save_to_csv(url: str, price: str):
 
 # Конфигурация
 URLS_FILE_PATH = "all_product_urls.txt"  # Путь к файлу со всеми URL
-RANDOM_URLS_COUNT = 2  # Количество случайных URL для обработки
+RANDOM_URLS_COUNT = 100  # Количество случайных URL для обработки
 OUTPUT_FILE = "prices.csv"
 
 
