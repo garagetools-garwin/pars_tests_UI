@@ -466,11 +466,108 @@ MOSCOW_BUTTON = '[data-qa="location"] p:has-text("Москва")'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 
+def load_random_urls(file_path, count=100):
+    """
+    Загружает случайную выборку URL из файла
+
+    Args:
+        file_path (str): Путь к файлу с URL (каждый URL на новой строке)
+        count (int): Количество случайных URL для выбора
+
+    Returns:
+        list: Список случайно выбранных URL
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            all_urls = [line.strip() for line in f if line.strip()]
+
+        if len(all_urls) < count:
+            print(f"Внимание: в файле только {len(all_urls)} URL, а запрошено {count}")
+            return all_urls
+
+        random_urls = random.sample(all_urls, count)
+        print(f"Выбрано {len(random_urls)} случайных URL из {len(all_urls)} доступных")
+        return random_urls
+
+    except FileNotFoundError:
+        print(f"Файл {file_path} не найден!")
+        return []
+    except Exception as e:
+        print(f"Ошибка при чтении файла {file_path}: {e}")
+        return []
+
+
+def load_random_urls_from_csv(csv_file_path, url_column=0, count=100):
+    """Загружает случайные URL из CSV файла"""
+    try:
+        all_urls = []
+        with open(csv_file_path, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if len(row) > url_column and row[url_column].strip():
+                    all_urls.append(row[url_column].strip())
+
+        if len(all_urls) < count:
+            print(f"Внимание: в CSV файле только {len(all_urls)} URL, а запрошено {count}")
+            return all_urls
+
+        random_urls = random.sample(all_urls, count)
+        print(f"Выбрано {len(random_urls)} случайных URL из {len(all_urls)} доступных (CSV)")
+        return random_urls
+
+    except FileNotFoundError:
+        print(f"CSV файл {csv_file_path} не найден!")
+        return []
+    except Exception as e:
+        print(f"Ошибка при чтении CSV файла {csv_file_path}: {e}")
+        return []
+
+
+def human_delay(min_sec=0.5, max_sec=1.5):
+    """Создает случайную задержку, имитирующую поведение человека"""
+    time.sleep(random.uniform(min_sec, max_sec))
+
+
+def save_to_csv(url: str, price: str):
+    """Сохраняет результат в CSV файл"""
+    today = datetime.date.today().isoformat()
+    file_exists = os.path.isfile(OUTPUT_FILE)
+    with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["Дата", "URL", "Цена"])
+        writer.writerow([today, url, price])
+
+
+# Конфигурация
+URLS_FILE_PATH = "../all_product_urls.txt"  # Путь к файлу со всеми URL
+RANDOM_URLS_COUNT = 2  # Количество случайных URL для обработки
+OUTPUT_FILE = "prices.csv"
+
+
 @allure.title("Сбор цен по всем товарам одним тестом")
 def test_get_all_prices_human_like_2(page_fixture):
     page = page_fixture()
     solver = SyncCaptchaSlider(page)
     price_results = []
+
+    # Загружаем случайные URL из файла
+    with allure.step(f"Загрузка {RANDOM_URLS_COUNT} случайных URL из файла"):
+        if URLS_FILE_PATH.endswith('.txt'):
+            product_urls = load_random_urls(URLS_FILE_PATH, RANDOM_URLS_COUNT)
+        elif URLS_FILE_PATH.endswith('.csv'):
+            product_urls = load_random_urls_from_csv(URLS_FILE_PATH, url_column=0, count=RANDOM_URLS_COUNT)
+        else:
+            product_urls = load_random_urls(URLS_FILE_PATH, RANDOM_URLS_COUNT)
+
+        if not product_urls:
+            pytest.fail(f"Не удалось загрузить URL из файла {URLS_FILE_PATH}")
+
+        allure.attach(
+            f"Загружено {len(product_urls)} URL из файла {URLS_FILE_PATH}",
+            name="Информация о загрузке",
+            attachment_type=allure.attachment_type.TEXT
+        )
 
     # Паттерн антибан настроек
     # page.context.set_extra_http_headers({"User-Agent": USER_AGENT})
@@ -531,8 +628,8 @@ def test_get_all_prices_human_like_2(page_fixture):
         # page.locator(MOSCOW_BUTTON).click()
         # human_delay(1.2, 2.5)
 
-    for url in PRODUCT_URLS:
-        with allure.step(f"Переход на товар: {url}"):
+    for index, url in enumerate(product_urls, 1):
+        with allure.step(f"Обработка товара {index}/{len(product_urls)}: {url}"):
             page.goto(url, wait_until="load", timeout=60000)
             with allure.step("Go to товар, обработка антибота"):
                 print("Ура, мы на товаре:", page.url)
