@@ -168,12 +168,29 @@ jobs:
       PROXY_USER: ${{ secrets.PROXY_USER }}
       PROXY_PASS: ${{ secrets.PROXY_PASS }}
     steps:
-      - name: Clean workspace
+      - name: Check and free disk space
         run: |
+          echo "=== Disk usage before cleanup ==="
+          df -h
+          
+          # Cleanup workspace
           rm -rf ${{ github.workspace }}/* || true
           rm -rf ${{ github.workspace }}/.??* || true
+          
+          # Cleanup if disk usage > 80%
+          USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+          if [ "$USAGE" -gt 80 ]; then
+            echo "Disk usage is ${USAGE}%, cleaning up..."
+            docker system prune -a -f || true
+            sudo journalctl --vacuum-size=50M || true
+          fi
+          
+          echo "=== Disk usage after cleanup ==="
+          df -h
       
       - uses: actions/checkout@v4
+        with:
+          clean: true
       
       - name: Set up Python
         uses: actions/setup-python@v4
