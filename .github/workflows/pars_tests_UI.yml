@@ -212,7 +212,7 @@ jobs:
       
       - name: Run tests
         run: |
-          pytest --alluredir=allure-results
+          pytest --headed --alluredir=allure-results
       
       - name: Check if Allure results exist
         if: always()
