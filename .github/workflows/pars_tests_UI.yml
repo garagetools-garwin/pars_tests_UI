@@ -202,6 +202,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Install Xvfb
+        run: sudo apt-get install -y xvfb
       
       - name: Ensure browsers are installed
         run: python -m playwright install chromium
@@ -212,7 +215,7 @@ jobs:
       
       - name: Run tests
         run: |
-          pytest --headed --alluredir=allure-results
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" pytest --headed --alluredir=allure-results
       
       - name: Check if Allure results exist
         if: always()
