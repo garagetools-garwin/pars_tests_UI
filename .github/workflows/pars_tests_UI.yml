@@ -168,6 +168,11 @@ jobs:
       PROXY_USER: ${{ secrets.PROXY_USER }}
       PROXY_PASS: ${{ secrets.PROXY_PASS }}
     steps:
+      - name: Clean workspace
+        run: |
+          rm -rf ${{ github.workspace }}/* || true
+          rm -rf ${{ github.workspace }}/.??* || true
+      
       - uses: actions/checkout@v4
       
       - name: Set up Python
