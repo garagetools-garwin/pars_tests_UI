@@ -4,92 +4,25 @@ import pytest
 from dotenv import load_dotenv
 import os
 import re
-from playwright.sync_api import Browser, Page, sync_playwright
-import os
-from playwright.async_api import async_playwright
-# from playwright_stealth import stealth_sync
+from playwright.sync_api import Browser, Page
 
 from page_opjects.autorization_page import AutorizationPage
 
 load_dotenv()  # Загружаем переменные из .env
 
-
 AUTH_USERNAME = os.getenv("AUTH_USERNAME")
 AUTH_PASSWORD = os.getenv("AUTH_PASSWORD")
 
-PROXY_HOST = os.getenv("PROXY_HOST")
-PROXY_PORT = os.getenv("PROXY_PORT")
-PROXY_USER = os.getenv("PROXY_USER")
-PROXY_PASS = os.getenv("PROXY_PASS")
-
-# proxy_settings = {
-#     "server": f"http://{PROXY_HOST}:8888"
-# }
-
-proxy_settings = {
-    "server": f"http://{PROXY_HOST}:{PROXY_PORT}",
-    "username": PROXY_USER,
-    "password": PROXY_PASS
-}
-
-# BROWSER_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-# BROWSER_VIEWPORT = {"width": 1920, "height": 1080}
-# BROWSER_INIT_SCRIPT = """
-# Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-# Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
-# Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5, 6]});
-# window.chrome = { runtime: {} };
-# """
 BROWSER_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-BROWSER_VIEWPORT = {"width": 1920, "height": 1080}
+BROWSER_VIEWPORT = {"width": 1366, "height": 768}
 BROWSER_INIT_SCRIPT = """
 Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-window.chrome = window.chrome || {};
+Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
+Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5, 6]});
 window.chrome = { runtime: {} };
-Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
-Object.defineProperty(navigator, 'languages', { get: () => ['ru-RU', 'ru', 'en-US', 'en'] });
-
-const getParameter = WebGLRenderingContext.prototype.getParameter;
-    WebGLRenderingContext.prototype.getParameter = function(parameter) {
-        if (parameter == 37445) { return "NVIDIA Corporation"; }
-        if (parameter == 37446) { return "NVIDIA GeForce GTX 1660/PCIe/SSE2"; }
-        return getParameter(parameter);
-    };
-    
-    const buffer = new ArrayBuffer(8);
-    const floatView = new Float32Array(buffer);
-    floatView[0] = Math.PI;
-    const sum = floatView.reduce((a, b) => a + b, 0);
-    window.__audioContextFingerprint = sum;
-    window._native_performance_now = performance.now;
-    performance.now = function () {
-        return window._native_performance_now() + Math.random()*10;
-    };
 """
-# BROWSER_INIT_SCRIPT = """
-#         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-#         Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru', 'en-US', 'en']});
-#         Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5, 6]});
-#         window.chrome = { runtime: {} };
-#         const getFakeData = () => new Uint8ClampedArray([128,128,128,255,128,128,128,255]);
-#         HTMLCanvasElement.prototype.toDataURL = function(){ return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Zw8AAjMBi/MaaWkAAAAASUVORK5CYII="; }
-#         window.OffscreenCanvas = HTMLCanvasElement;
-#         const _orig_ua = navigator.userAgent;
-#         Object.defineProperty(navigator, 'userAgent', { get: () => _orig_ua });
-#         Intl.DateTimeFormat = function() { return { resolvedOptions: () => ({ timeZone: 'Europe/Moscow' }) } }
-#     """
 
-chromium_args = [
-    "--window-size=1920,1080",
-    # "--start-maximized",
-    "--disable-blink-features=AutomationControlled",
-    "--disable-infobars",
-    # "--disable-dev-shm-usage",
-    "--no-sandbox",
-    # "--disable-gpu",
-    # "--disable-extensions",
-    #"--blink-settings=imagesEnabled=false",     # для отключения картинок (кастом)
-]
+
 
 
 # @pytest.fixture(scope="function")
@@ -238,85 +171,21 @@ def get_env_from_url(base_url: str) -> str:
 def build_auth_state_path(role: str, env: str) -> str:
     return os.path.join(ensure_auth_states_dir_exists(), f"auth_{role}_state_{env}.json")
 
-
-# @pytest.fixture(scope="session")
-# def browser():
-#     with sync_playwright() as p:
-#         # browser = p.chromium.launch(proxy=proxy_settings, headless=False)  # proxy — здесь!
-#         browser = p.chromium.launch(proxy=proxy_settings, headless=False)
-#         yield browser
-#         browser.close()
-
-@pytest.fixture(scope="session")
-def browser():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            proxy=proxy_settings,
-            headless=True,            # или False для headed-режима
-            args=chromium_args,
-            ignore_default_args=['--enable-automation']
-        )
-        yield browser
-        browser.close()
-
 # === ФАБРИКА СТРАНИЦ === #
 # Создает кастомный page
-# def page_factory(
-#     browser: Browser,
-#     base_url: str,
-#     role: str = None,
-#     use_manual_login: bool = False
-# ) -> Page:
-#
-#     env = get_env_from_url(base_url)
-#     context = None
-#
-#     ctx_kwargs = {
-#         "user_agent": BROWSER_USER_AGENT,
-#         "viewport": BROWSER_VIEWPORT
-#     }
-#
-#     if role:
-#         storage_state_path = build_auth_state_path(role, env)
-#         ctx_kwargs["storage_state"] = storage_state_path
-#         context = browser.new_context(**ctx_kwargs)
-#     else:
-#         context = browser.new_context(**ctx_kwargs)
-#
-#     page = context.new_page()
-#     page.add_init_script(BROWSER_INIT_SCRIPT)
-#     # stealth_sync(page)
-#     page.context.set_extra_http_headers({"User-Agent": BROWSER_USER_AGENT})  # если нужно
-#     page.set_viewport_size(BROWSER_VIEWPORT)                                 # повторно не обязательно
-#
-#     # авторизация через URL для стейджа, если требуется:
-#     if env == "stage" and not use_manual_login and role:
-#         from dotenv import load_dotenv
-#         load_dotenv()
-#         user = os.getenv("AUTH_USERNAME")
-#         pwd = os.getenv("AUTH_PASSWORD")
-#         auth_url = base_url.replace("https://", f"https://{user}:{pwd}@")
-#         page.goto(auth_url)
-#         context.storage_state(path=storage_state_path)
-#
-#     return page
-
-
-# Универсальная фабрика страницы с антидетектом
 def page_factory(
     browser: Browser,
     base_url: str,
     role: str = None,
     use_manual_login: bool = False
 ) -> Page:
+
     env = get_env_from_url(base_url)
     context = None
 
     ctx_kwargs = {
         "user_agent": BROWSER_USER_AGENT,
-        "viewport": BROWSER_VIEWPORT,
-        "locale": "ru-RU",           # добавляет больше “натурализма”
-        "color_scheme": "light",
+        "viewport": BROWSER_VIEWPORT
     }
 
     if role:
@@ -328,10 +197,8 @@ def page_factory(
 
     page = context.new_page()
     page.add_init_script(BROWSER_INIT_SCRIPT)
-
-    # Не нужно дублировать ниже, если всё уже на уровне context:
-    # page.context.set_extra_http_headers({"User-Agent": BROWSER_USER_AGENT})
-    # page.set_viewport_size(BROWSER_VIEWPORT)
+    page.context.set_extra_http_headers({"User-Agent": BROWSER_USER_AGENT})  # если нужно
+    page.set_viewport_size(BROWSER_VIEWPORT)                                 # повторно не обязательно
 
     # авторизация через URL для стейджа, если требуется:
     if env == "stage" and not use_manual_login and role:
