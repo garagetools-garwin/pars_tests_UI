@@ -586,6 +586,21 @@ def test_get_all_prices_human_like_2(page_fixture):
     # """)
 
     with allure.step("Переход на главную и прогрев страницы"):
+        page.goto("https://abrahamjuliot.github.io/creepjs/")
+        # Даем сайту полностью загрузиться и просчитать проценты
+        page.wait_for_timeout(4000)
+        # Парсим проценты из DOM
+        like_headless = page.locator("text=like headless").locator("xpath=../following-sibling::div").first.inner_text()
+        headless = page.locator("text=headless").locator("xpath=../following-sibling::div").first.inner_text()
+        print(f"like headless: {like_headless}")
+        print(f"headless: {headless}")    page.goto("https://abrahamjuliot.github.io/creepjs/")
+        # Даем сайту полностью загрузиться и просчитать проценты
+        page.wait_for_timeout(4000)
+        # Парсим проценты из DOM
+        like_headless = page.locator("text=like headless").locator("xpath=../following-sibling::div").first.inner_text()
+        headless = page.locator("text=headless").locator("xpath=../following-sibling::div").first.inner_text()
+        print(f"like headless: {like_headless}")
+        print(f"headless: {headless}")
         # page.goto("https://api.ipify.org")
         # ip = page.text_content("body").strip()
         # print("Мой реальный внешний IP:", ip)
