@@ -32,6 +32,7 @@ jobs:
 
     # запуск на виртуальной машине
     if: |
+      github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch' && 
       (github.event.inputs.runner_type == 'github-hosted' || github.event.inputs.runner_type == 'both')
     runs-on: ubuntu-latest
@@ -154,7 +155,7 @@ jobs:
 # Job для self-hosted runner (по расписанию + вручную)
   tests-self-hosted:
     if: |
-      github.event_name == 'schedule' ||
+      # github.event_name == 'schedule' ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.runner_type == 'self-hosted' || github.event.inputs.runner_type == 'both'))
     timeout-minutes: 260
     concurrency: pars_tests_UI_concurrency
