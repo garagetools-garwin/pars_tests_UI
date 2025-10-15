@@ -112,7 +112,7 @@ jobs:
         run: echo "allure_results_exist=${{ steps.check_allure.outputs.allure_results_exist }}"
 
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: extracted-ip
           path: extracted_ip.txt
