@@ -111,6 +111,12 @@ jobs:
         if: always()
         run: echo "allure_results_exist=${{ steps.check_allure.outputs.allure_results_exist }}"
 
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: extracted-ip
+          path: extracted_ip.txt
+
       # Загрузка артефактов
       - name: Upload Allure Results
         uses: actions/upload-artifact@v4
