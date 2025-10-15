@@ -73,6 +73,9 @@ jobs:
       #     echo "socks5 ${{ secrets.DANTE_HOST }} ${{ secrets.DANTE_PORT }} ${{ secrets.DANTE_USER }} ${{ secrets.DANTE_PASS }}" >> proxychains.conf
       #     sudo cp proxychains.conf /etc/proxychains.conf
 
+      - name: Install Xvfb
+        run: sudo apt-get install -y xvfb
+      
       # Установка браузеров
       - name: Ensure browsers are installed
         run: python -m playwright install --with-deps
@@ -91,7 +94,7 @@ jobs:
       # Запуск тестов
       - name: Run tests
         run: |
-          pytest --alluredir=allure-results
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" pytest --headed --alluredir=allure-results
           
       # Проверка наличия json-файлов в allure-results (чтобы не запушить сломаный отчет)
       - name: Check if Allure results exist
