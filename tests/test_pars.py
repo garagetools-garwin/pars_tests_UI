@@ -602,7 +602,12 @@ def test_get_all_prices_human_like_2(page_fixture):
         page.goto("https://api.ipify.org", wait_until="domcontentloaded")
         page.wait_for_selector("body")
         ip = page.text_content("body").strip()
-        print("Мой реальный внешний IP:", ip)
+        print("Мой реальный внешний IP:", ip)  # в консоль может быть ***
+        with open("extracted_ip.txt", "w") as f:
+            f.write(ip + "\n")                 # но в файл пишется реально
+    except Exception as e:
+        print("Ошибка при получении IP:", e)
+    
     except Exception as e:
         print("Ошибка при получении IP:", e)
         page.mouse.move(200, 250)
