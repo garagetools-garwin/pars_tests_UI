@@ -598,9 +598,13 @@ def test_get_all_prices_human_like_2(page_fixture):
         full_text = page2.evaluate("() => document.body.innerText")
         print("\n=== [creepjs] full page text second tab ===\n")
         print(full_text)
-        page.goto("https://api.ipify.org")
+    try:
+        page.goto("https://api.ipify.org", wait_until="domcontentloaded")
+        page.wait_for_selector("body")
         ip = page.text_content("body").strip()
         print("Мой реальный внешний IP:", ip)
+    except Exception as e:
+        print("Ошибка при получении IP:", e)
         page.mouse.move(200, 250)
         page.mouse.down()
         page.mouse.up()
