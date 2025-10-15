@@ -155,7 +155,6 @@ jobs:
 # Job для self-hosted runner (по расписанию + вручную)
   tests-self-hosted:
     if: |
-      # github.event_name == 'schedule' ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.runner_type == 'self-hosted' || github.event.inputs.runner_type == 'both'))
     timeout-minutes: 260
     concurrency: pars_tests_UI_concurrency
