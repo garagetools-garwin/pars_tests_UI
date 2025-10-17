@@ -1,6 +1,12 @@
 import pytest
 from playwright.sync_api import sync_playwright
 
+def ensure_auth_states_dir_exists() -> str:
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    auth_states_dir = os.path.join(project_root, 'auth_states')
+    os.makedirs(auth_states_dir, exist_ok=True)
+    return auth_states_dir
+
 # --- Минимальный BROWSER_INIT_SCRIPT ---
 BROWSER_INIT_SCRIPT = """
 Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
