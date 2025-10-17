@@ -264,7 +264,7 @@ def browser():
             # proxy=proxy_settings,
             headless=False,            # или False для headed-режима
             args=chromium_args,
-            ignore_default_args=['--enable-automation']
+            # ignore_default_args=['--enable-automation']
         )
         yield browser
         browser.close()
