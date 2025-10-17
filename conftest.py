@@ -261,7 +261,7 @@ def build_auth_state_path(role: str, env: str) -> str:
 def browser():
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            # proxy=proxy_settings,
+            proxy=proxy_settings,
             headless=False,            # или False для headed-режима
             args=chromium_args,
             # ignore_default_args=['--enable-automation']
