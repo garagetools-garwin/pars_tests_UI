@@ -61,7 +61,7 @@ def browser():
         browser = p.chromium.launch(
             headless=False,
             args=chromium_args,
-            #proxy=proxy_settings,  # если нужно
+            proxy=proxy_settings,  # если нужно
             #ignore_default_args=['--enable-automation']
         )
         yield browser
