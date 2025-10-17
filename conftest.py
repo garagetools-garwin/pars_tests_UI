@@ -42,29 +42,39 @@ proxy_settings = {
 # """
 BROWSER_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 BROWSER_VIEWPORT = {"width": 1920, "height": 1080}
+
+# Упрощенный скрипт для xvfb
 BROWSER_INIT_SCRIPT = """
 Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
 window.chrome = window.chrome || {};
 window.chrome = { runtime: {} };
-Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
-Object.defineProperty(navigator, 'languages', { get: () => ['ru-RU', 'ru', 'en-US', 'en'] });
+Object.defineProperty(navigator, 'languages', { get: () => ['ru-RU', 'ru'] });
+"""
 
-const getParameter = WebGLRenderingContext.prototype.getParameter;
-    WebGLRenderingContext.prototype.getParameter = function(parameter) {
-        if (parameter == 37445) { return "NVIDIA Corporation"; }
-        if (parameter == 37446) { return "NVIDIA GeForce GTX 1660/PCIe/SSE2"; }
-        return getParameter(parameter);
-    };
+# Последний актуальный скрипт
+# BROWSER_INIT_SCRIPT = """
+# Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+# window.chrome = window.chrome || {};
+# window.chrome = { runtime: {} };
+# Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
+# Object.defineProperty(navigator, 'languages', { get: () => ['ru-RU', 'ru', 'en-US', 'en'] });
+
+# const getParameter = WebGLRenderingContext.prototype.getParameter;
+#     WebGLRenderingContext.prototype.getParameter = function(parameter) {
+#         if (parameter == 37445) { return "NVIDIA Corporation"; }
+#         if (parameter == 37446) { return "NVIDIA GeForce GTX 1660/PCIe/SSE2"; }
+#         return getParameter(parameter);
+#     };
     
-    const buffer = new ArrayBuffer(8);
-    const floatView = new Float32Array(buffer);
-    floatView[0] = Math.PI;
-    const sum = floatView.reduce((a, b) => a + b, 0);
-    window.__audioContextFingerprint = sum;
-    window._native_performance_now = performance.now;
-    performance.now = function () {
-        return window._native_performance_now() + Math.random()*10;
-    };
+#     const buffer = new ArrayBuffer(8);
+#     const floatView = new Float32Array(buffer);
+#     floatView[0] = Math.PI;
+#     const sum = floatView.reduce((a, b) => a + b, 0);
+#     window.__audioContextFingerprint = sum;
+#     window._native_performance_now = performance.now;
+#     performance.now = function () {
+#         return window._native_performance_now() + Math.random()*10;
+#     };
 """
 # BROWSER_INIT_SCRIPT = """
 #         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
@@ -82,7 +92,7 @@ const getParameter = WebGLRenderingContext.prototype.getParameter;
 chromium_args = [
     "--window-size=1920,1080",
     # "--start-maximized",
-    "--disable-blink-features=AutomationControlled",
+    # "--disable-blink-features=AutomationControlled",
     "--disable-infobars",
     # "--disable-dev-shm-usage",
     "--no-sandbox",
