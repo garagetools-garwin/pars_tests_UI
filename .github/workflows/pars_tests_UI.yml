@@ -40,10 +40,10 @@ jobs:
       ADMIN_BUYER_EMAIL: ${{ secrets.ADMIN_BUYER_EMAIL }}
       GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
       GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
-      PROXY_HOST: ${{ secrets.PROXY_HOST }}
-      PROXY_PORT: ${{ secrets.PROXY_PORT }}
-      PROXY_USER: ${{ secrets.PROXY_USER }}
-      PROXY_PASS: ${{ secrets.PROXY_PASS }}
+      PROXY_HOST: ${{ secrets.PROXY_HOST_MARKET }}
+      PROXY_PORT: ${{ secrets.PROXY_PORT_MARKET }}
+      PROXY_USER: ${{ secrets.PROXY_USER_MARKET }}
+      PROXY_PASS: ${{ secrets.PROXY_PASS_MARKET }}
       
     steps:
 
